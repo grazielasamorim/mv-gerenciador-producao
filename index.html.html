@@ -1,0 +1,2686 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Supervisor Digital de Produção — Login Supabase Real</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Skip artifact shell — fixed styles served beside every artifact.
+   Tokens, utilities and components (basecoat 1.0 markup, no CDN); artifacts
+   override --accent for their own identity. */
+:root {
+  color-scheme: light dark;
+  --accent: #2563eb;
+  --accent-contrast: #ffffff;
+  --accent-text: color-mix(in srgb, var(--accent) 72%, #000);
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --text: #14171f;
+  --text-muted: #5b6472;
+  --border: rgba(20, 23, 31, 0.10);
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(20, 23, 31, 0.08);
+  --space: 16px;
+  --success: #0a7a35;
+  --danger: #c0262d;
+  --warning: #8a5300;
+}
+/* Theme resolution. Without data-theme the viewer's system preference decides,
+   as it always did. With it, the artifact's own choice wins in BOTH directions:
+   a page that hardcodes one palette must not be handed the opposite set of
+   tokens by the machine it happens to be opened on. The dark values appear
+   twice because a media query cannot be folded into a selector list.
+   The attribute sits inside :where() so these blocks keep the specificity of a
+   bare :root — the page's own <style> is linked after this file and must go on
+   overriding any token it wants, exactly as it could before. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+    --bg: #101318;
+    --surface: #181c23;
+    --text: #eef1f6;
+    --text-muted: #9aa4b2;
+    --border: rgba(238, 241, 246, 0.12);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --success: #4ade80;
+    --danger: #f87171;
+    --warning: #fbbf24;
+  }
+}
+:root:where([data-theme="dark"]) {
+  color-scheme: dark;
+  --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+  --bg: #101318;
+  --surface: #181c23;
+  --text: #eef1f6;
+  --text-muted: #9aa4b2;
+  --border: rgba(238, 241, 246, 0.12);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --success: #4ade80;
+  --danger: #f87171;
+  --warning: #fbbf24;
+}
+:root:where([data-theme="light"]) { color-scheme: light; }
+/* Pages generated before the shell had its own components still link the
+   basecoat CDN, which reads its own tokens and switches theme only on a
+   .dark class. Bridged to the shell's, whatever of it those pages use takes
+   the page's accent and follows the declared theme. Its --accent token is a
+   hover tint, renamed in its theme as --color-accent; the shell's --accent is
+   the brand colour, so the tint is derived from it here. */
+:root {
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-contrast);
+  --secondary: color-mix(in srgb, var(--text) 7%, var(--surface));
+  --secondary-foreground: var(--text);
+  --muted: color-mix(in srgb, var(--text) 5%, var(--surface));
+  --muted-foreground: var(--text-muted);
+  --color-accent: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --color-accent-foreground: var(--text);
+  --destructive: var(--danger);
+  --input: var(--border);
+  --ring: var(--accent);
+}
+* { box-sizing: border-box; }
+/* The reset the pages were written against: they all linked basecoat, which
+   ships Tailwind's. Its components now live here, so the reset does too. */
+*, ::before, ::after, ::backdrop { margin: 0; padding: 0; border: 0 solid; }
+/* Preflight's rule too: without it a component class that sets display
+   (.alert, .card, .btn…) beats the hidden attribute and shows the element. */
+[hidden]:where(:not([hidden="until-found"])) { display: none !important; }
+.hidden { display: none !important; }
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+a { color: inherit; text-decoration: inherit; }
+b, strong { font-weight: bolder; }
+ol, ul, menu { list-style: none; }
+svg, video, canvas, iframe { display: block; vertical-align: middle; }
+button, input, select, textarea { color: inherit; background-color: transparent; border-radius: 0; }
+table { border-collapse: collapse; }
+hr { height: 0; color: inherit; border-top-width: 1px; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+
+.shell-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.shell-section { padding: calc(var(--space) * 2) 0; }
+.shell-grid { display: grid; gap: var(--space); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.shell-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: var(--space); }
+.shell-footer { padding: 24px 0 40px; color: var(--text-muted); font-size: 13px; }
+
+.shell-hero { padding: calc(var(--space) * 3) 0 calc(var(--space) * 2); }
+.shell-hero h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+.shell-hero p { color: var(--text-muted); max-width: 60ch; margin: 0; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space);
+}
+
+.kpi { display: flex; flex-direction: column; gap: 4px; }
+.kpi .kpi-value { font-size: clamp(22px, 2.3vw, 28px); font-weight: 650; line-height: 1.1; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.kpi .kpi-label { font-size: 13px; color: var(--text-muted); }
+.kpi .kpi-delta { font-size: 12.5px; font-weight: 600; }
+.kpi .kpi-delta.up { color: var(--success); }
+.kpi .kpi-delta.down { color: var(--danger); }
+
+table.shell-table { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.shell-table th {
+  text-align: left; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 600;
+}
+table.shell-table th, table.shell-table td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); }
+table.shell-table td.num, table.shell-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+.chart-box { width: 100%; min-height: 220px; }
+.chart-box svg { width: 100%; height: auto; display: block; }
+.chart-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin-top: 12px; font-size: 12.5px; color: var(--text-muted); }
+.chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.chart-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.chart-legend b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.muted { color: var(--text-muted); }
+.accent { color: var(--accent-text); }
+.shell-badge, .eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-text);
+}
+/* A pill keeps its content width inside flex and grid columns, which would
+   otherwise stretch it across the card; a centred parent still centres it. */
+.shell-badge, .eyebrow, .badge { width: fit-content; max-width: 100%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .shell-fade { animation: shell-fade 400ms ease both; }
+  @keyframes shell-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+
+/* Layout and type utilities: what the pages kept spelling in style="".
+   Spacing and type sizes follow Tailwind's scale; there is no Tailwind. */
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.stack { display: flex; flex-direction: column; gap: var(--space); }
+.between { justify-content: space-between; }
+.grow { flex: 1 1 0; min-width: 0; }
+.cols-2, .cols-3, .cols-4, .cols-5 { display: grid; gap: var(--space); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 720px) {
+  .cols-2, .cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cols-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1000px) { .cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.gap-1 { gap: 4px; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; } .gap-6 { gap: 24px; }
+.m-0 { margin: 0; }
+.mt-1 { margin-top: 4px; } .mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; } .mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; }
+.mb-1 { margin-bottom: 4px; } .mb-2 { margin-bottom: 8px; } .mb-3 { margin-bottom: 12px; } .mb-4 { margin-bottom: 16px; } .mb-6 { margin-bottom: 24px; }
+.p-2 { padding: 8px; } .p-3 { padding: 12px; } .p-4 { padding: 16px; } .p-6 { padding: 24px; }
+.text-xs { font-size: 12px; } .text-sm { font-size: 14px; } .text-base { font-size: 16px; }
+.text-lg { font-size: 18px; } .text-xl { font-size: 20px; line-height: 1.35; }
+.text-2xl { font-size: 24px; line-height: 1.25; } .text-3xl { font-size: 30px; line-height: 1.2; }
+.font-medium { font-weight: 500; } .font-semibold { font-weight: 600; } .font-bold { font-weight: 700; }
+.text-right { text-align: right; } .text-center { text-align: center; }
+.nowrap { white-space: nowrap; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+.w-full { width: 100%; }
+.text-success { color: var(--success); } .text-danger { color: var(--danger); } .text-warning { color: var(--warning); }
+
+/* Components, with basecoat 1.0 markup (variants and sizes are data
+   attributes) and the shell tokens, so a page needs neither component CSS
+   nor a CSS framework. An older page that also links basecoat gets these
+   rules after it, over the same properties. */
+button, input, select, textarea { font: inherit; }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 14px; border: 1px solid transparent; border-radius: calc(var(--radius) - 2px);
+  background: var(--accent); color: var(--accent-contrast);
+  font-size: 14px; font-weight: 500; line-height: 1; white-space: nowrap; text-decoration: none; cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.btn:hover { background: color-mix(in srgb, var(--accent) 86%, #000); }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+.btn[data-variant="secondary"] { background: color-mix(in srgb, var(--text) 8%, var(--surface)); color: var(--text); }
+.btn[data-variant="secondary"]:hover { background: color-mix(in srgb, var(--text) 14%, var(--surface)); }
+.btn[data-variant="outline"] { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn[data-variant="ghost"] { background: transparent; color: var(--text); }
+.btn[data-variant="outline"]:hover, .btn[data-variant="ghost"]:hover { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+.btn[data-variant="destructive"] { background: var(--danger); color: var(--bg); }
+.btn[data-variant="destructive"]:hover { background: color-mix(in srgb, var(--danger) 86%, var(--text)); }
+.btn[data-variant="link"] { height: auto; padding: 0; background: none; color: var(--accent-text); text-decoration: underline; text-underline-offset: 3px; }
+.btn[data-size="sm"] { height: 30px; padding: 0 10px; font-size: 13px; }
+.btn[data-size="lg"] { height: 42px; padding: 0 20px; font-size: 15px; }
+.btn[data-size="icon"] { width: 36px; padding: 0; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  border: 1px solid transparent; border-radius: 999px; background: var(--accent); color: var(--accent-contrast);
+  font-size: 12px; font-weight: 600; line-height: 1.5; white-space: nowrap;
+}
+.badge[data-variant="secondary"] { background: color-mix(in srgb, var(--text) 8%, var(--surface)); color: var(--text); }
+.badge[data-variant="outline"] { background: transparent; color: var(--text); border-color: var(--border); }
+.badge[data-variant="destructive"] { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); color: var(--danger); }
+
+.alert {
+  display: grid; gap: 4px; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); font-size: 14px;
+}
+.alert h2, .alert h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.alert p, .alert section { margin: 0; color: var(--text-muted); }
+.alert[data-variant="destructive"] { border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); background: color-mix(in srgb, var(--danger) 7%, var(--surface)); color: var(--danger); }
+
+.card {
+  display: flex; flex-direction: column; gap: 16px; padding: 20px 0;
+  border: 1px solid var(--border); border-radius: calc(var(--radius) + 2px);
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow);
+}
+.card > header, .card > section, .card > footer { padding: 0 20px; }
+.card > header { display: grid; gap: 4px; }
+.card > header h2, .card > header h3 { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.3; }
+.card > header p { margin: 0; color: var(--text-muted); font-size: 14px; }
+.card > footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.input {
+  width: 100%; min-height: 36px; padding: 6px 12px; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px);
+  background: var(--surface); color: var(--text); font-size: 14px;
+}
+textarea.input { min-height: 84px; resize: vertical; }
+.input::placeholder { color: var(--text-muted); }
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 14px; font-weight: 500; }
+.field [role="alert"] { color: var(--danger); font-size: 13px; }
+
+dialog.dialog {
+  width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); margin: auto; padding: 0;
+  border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px);
+  background: var(--surface); color: var(--text); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+dialog.dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+dialog.dialog > div { display: grid; gap: 16px; padding: 24px; }
+dialog.dialog header { display: grid; gap: 4px; }
+dialog.dialog header h2 { margin: 0; font-size: 18px; font-weight: 600; }
+dialog.dialog header p { margin: 0; color: var(--text-muted); font-size: 14px; }
+dialog.dialog footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+.tabs { display: grid; gap: 12px; }
+.tabs > [role="tablist"] {
+  display: inline-flex; gap: 4px; width: fit-content; max-width: 100%; padding: 4px; overflow-x: auto;
+  border-radius: var(--radius); background: color-mix(in srgb, var(--text) 6%, var(--surface));
+}
+.tabs [role="tab"] {
+  padding: 6px 12px; border: 0; border-radius: calc(var(--radius) - 4px); background: transparent;
+  color: var(--text-muted); font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer;
+}
+.tabs [role="tab"][aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.tabs [role="tabpanel"][hidden] { display: none; }
+
+.accordion > details { border-bottom: 1px solid var(--border); }
+.accordion > details > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 0; font-weight: 500; list-style: none; cursor: pointer;
+}
+.accordion > details > summary::-webkit-details-marker { display: none; }
+.accordion > details > summary::after { content: "+"; color: var(--text-muted); font-size: 18px; line-height: 1; }
+.accordion > details[open] > summary::after { content: "\2212"; }
+.accordion > details > :not(summary) { margin: 0 0 14px; color: var(--text-muted); }
+
+.toaster {
+  position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; flex-direction: column-reverse; gap: 8px;
+  width: min(360px, calc(100vw - 32px)); pointer-events: none;
+}
+.toaster .toast { pointer-events: auto; transition: opacity 200ms ease, transform 200ms ease; }
+.toaster .toast[aria-hidden="true"] { opacity: 0; transform: translateY(8px); }
+.toaster .toast-content {
+  padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); font-size: 13px;
+}
+.toaster .toast-content h2 { margin: 0 0 2px; font-size: 14px; font-weight: 600; }
+.toaster .toast-content p { margin: 0; color: var(--text-muted); }
+
+/* skipUI building blocks. */
+.skip-table-search { max-width: 320px; margin-bottom: 12px; }
+.skip-table-wrap { overflow-x: auto; }
+table.shell-table th[data-sort] { cursor: pointer; user-select: none; }
+table.shell-table th[aria-sort="ascending"]::after { content: " \25B2"; font-size: 9px; }
+table.shell-table th[aria-sort="descending"]::after { content: " \25BC"; font-size: 9px; }
+table.shell-table td.skip-table-empty { color: var(--text-muted); text-align: center; padding: 24px 0; }
+.skip-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; font-size: 13px; color: var(--text-muted); }
+.toaster .toast[data-type="success"] .toast-content { border-left: 3px solid var(--success); }
+.toaster .toast[data-type="error"] .toast-content { border-left: 3px solid var(--danger); }
+
+</style>
+<script>
+/* Skip artifact shell — fixed helpers served beside every artifact. */
+(function () {
+  "use strict";
+
+  var fmt = {
+    num: function (v, opts) { return new Intl.NumberFormat("pt-BR", opts || {}).format(v); },
+    brl: function (v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); },
+    pct: function (v) { return new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 }).format(v); },
+    compact: function (v) { return new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(v); },
+    brlCompact: function (v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1 }).format(v); }
+  };
+
+  // axisLabels formats the five y-axis ticks in the unit the chart declared
+  // (percent, BRL or plain numbers), compact so long values never clip, with
+  // the fewest decimals that still print every tick exactly (1,5 mi, not 2 mi).
+  function axisLabels(format, ticks) {
+    function at(digits) {
+      var opts = { notation: "compact", maximumFractionDigits: digits };
+      if (format === "pct") opts = { style: "percent", maximumFractionDigits: digits };
+      else if (format === "brl") opts = { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: digits };
+      var nf = new Intl.NumberFormat("pt-BR", opts);
+      return ticks.map(function (t) { return nf.format(t); });
+    }
+    for (var digits = 0; digits < 2; digits++) {
+      if (at(digits).join("|") === at(digits + 1).join("|")) return at(digits);
+    }
+    return at(2);
+  }
+
+  // yAxisPad formats the ticks and measures the left padding they need from
+  // the longest one; drawYAxis then draws the grid and the labels.
+  function yAxisPad(format, max) {
+    var labels = axisLabels(format, [0, max / 4, max / 2, (max * 3) / 4, max]);
+    var longest = labels.reduce(function (m, l) { return Math.max(m, l.length); }, 0);
+    return { labels: labels, padL: Math.max(40, Math.round(longest * 6.2) + 14) };
+  }
+  function drawYAxis(svg, axis, W, padR, padT, plotH) {
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: axis.padL, y1: gy, x2: W - padR, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: axis.padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axis.labels[g];
+      svg.appendChild(lbl);
+    }
+  }
+
+  // xLabelStep: show every k-th category label so labels never overlap, and
+  // always the last one (counted back from the end).
+  function xLabelStep(labels, step) {
+    var longest = labels.reduce(function (m, l) { return Math.max(m, String(l).length); }, 0);
+    return Math.max(1, Math.ceil((longest * 6.4 + 8) / Math.max(step, 1)));
+  }
+  function drawXLabel(svg, text, x, y, W, edgeGuard) {
+    var anchor = "middle";
+    var half = String(text).length * 3.2;
+    if (edgeGuard && x - half < 4) anchor = "start";
+    if (edgeGuard && x + half > W - 4) anchor = "end";
+    var tx = svgEl("text", { x: x, y: y, "text-anchor": anchor, "font-size": 11, fill: mutedColor() });
+    tx.textContent = text;
+    svg.appendChild(tx);
+  }
+  // categoryLines fits a bar's category name in its slot: one line, two lines
+  // split at a space, or cut with "…". A bar without its name can't be read, so
+  // categories are never skipped; null when the slot is too narrow for that.
+  function categoryLines(text, slot) {
+    var fit = Math.floor((slot - 6) / 6.4);
+    var s = String(text);
+    if (fit < 4) return null;
+    if (s.length <= fit) return [s];
+    var cut = function (t) { return t.length <= fit ? t : t.slice(0, fit - 1).trimEnd() + "…"; };
+    var best = -1;
+    for (var i = 0; i < s.length; i++) {
+      if (s[i] === " " && (best < 0 || Math.abs(s.length / 2 - i) < Math.abs(s.length / 2 - best))) best = i;
+    }
+    if (best < 0) return [cut(s)];
+    return [cut(s.slice(0, best)), cut(s.slice(best + 1))];
+  }
+  function legend(el, items) {
+    var box = document.createElement("div");
+    box.className = "chart-legend";
+    items.forEach(function (it) {
+      var row = document.createElement("span");
+      var dot = document.createElement("i");
+      dot.style.background = it.color;
+      row.appendChild(dot);
+      row.appendChild(document.createTextNode((it.label || "") + (it.value ? " " : "")));
+      if (it.value) {
+        var v = document.createElement("b");
+        v.textContent = it.value;
+        row.appendChild(v);
+      }
+      box.appendChild(row);
+    });
+    resolve(el).appendChild(box);
+  }
+  var seriesPalette = ["#1baf7a", "#eda100", "#e34948", "#4a3aa7", "#e87ba4", "#0ea5b7"];
+
+  // format accepts a function OR one of the fmt names ("num" | "brl" | "pct").
+  // A page's function may return nothing or throw: the chart prints its
+  // number instead of taking the rest of the page script down with it.
+  function coerceFormat(spec) {
+    if (typeof spec === "function") {
+      return function (v) {
+        try {
+          var out = spec(v);
+          return out == null ? "" : String(out);
+        } catch (e) {
+          return fmt.num(v);
+        }
+      };
+    }
+    if (typeof spec === "string" && fmt[spec]) return fmt[spec];
+    return function (v) { return fmt.num(v); };
+  }
+
+  function accent() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2563eb";
+  }
+  function mutedColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#5b6472";
+  }
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  function frame(el, w, h) {
+    var svg = svgEl("svg", { viewBox: "0 0 " + w + " " + h, role: "img" });
+    el = resolve(el);
+    el.innerHTML = "";
+    el.appendChild(svg);
+    return svg;
+  }
+
+  // maxOf guards the axis scale: empty values would give -Infinity (truthy,
+  // so "|| 1" can't catch it) and a non-positive max would flip the chart.
+  // finite reads a chart value as a number, 0 when it is not one (NaN,
+  // Infinity, a stray string), so one bad value cannot blank the axis.
+  function finite(v) {
+    var n = +v;
+    return isFinite(n) ? n : 0;
+  }
+
+  function maxOf(values) {
+    var m = values.length ? Math.max.apply(null, values.map(finite)) : 0;
+    return m > 0 ? m : 1;
+  }
+
+  // labelsFor pads or trims the category names to the n points drawn: pages
+  // pass labels and values of different lengths, and one throw here loses
+  // every section the page renders after the chart.
+  function labelsFor(cfg, n) {
+    var out = [];
+    for (var i = 0; i < n; i++) out.push(cfg.labels && cfg.labels[i] != null ? String(cfg.labels[i]) : "");
+    return out;
+  }
+
+  // niceMax rounds the scale up so the four grid steps land on round values
+  // (1, 1.5, 2, 2.5, 3, 4, 5, 6 or 8 × 10^k) and the tick labels read exactly.
+  function niceMax(max) {
+    var raw = max / 4;
+    var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var res = raw / mag;
+    var steps = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+    var nice = steps.filter(function (s) { return s >= res - 1e-9; })[0];
+    return nice * mag * 4;
+  }
+
+  // bar(el, {labels:[], values:[], color?, format?}) — vertical bar chart.
+  function bar(el, cfg) {
+    var W = 640, H = 280, padB = 30, padT = 12, padR = 12;
+    var max = niceMax(maxOf(cfg.values));
+    var axis = yAxisPad(cfg.format, max);
+    var svg = frame(el, W, H);
+    var n = cfg.values.length;
+    var labels = labelsFor(cfg, n);
+    var plotW = W - axis.padL - padR;
+    var step = plotW / n, bw = Math.min(step * 0.62, 64);
+    var names = labels.map(function (l) { return categoryLines(l, step); });
+    var named = names.every(Boolean);
+    if (named && names.some(function (l) { return l.length > 1; })) padB = 42;
+    var plotH = H - padT - padB;
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    var every = xLabelStep(labels, step);
+    drawYAxis(svg, axis, W, padR, padT, plotH);
+    cfg.values.forEach(function (v, i) {
+      var bh = Math.max(0, (finite(v) / max) * plotH);
+      var x = axis.padL + i * step + (step - bw) / 2;
+      var y = padT + plotH - bh;
+      var r = svgEl("rect", { x: x, y: y, width: bw, height: bh, rx: 4, fill: (cfg.colors && cfg.colors[i]) || color });
+      var t = svgEl("title", {});
+      t.textContent = labels[i] + ": " + f(v);
+      r.appendChild(t);
+      svg.appendChild(r);
+      if (named) {
+        names[i].forEach(function (text, li) {
+          drawXLabel(svg, text, x + bw / 2, padT + plotH + 18 + li * 13, W, false);
+        });
+      } else if ((n - 1 - i) % every === 0) {
+        drawXLabel(svg, labels[i], x + bw / 2, H - 10, W, false);
+      }
+    });
+  }
+
+  // line(el, {labels:[], values:[] | series:[{label, values, color?}], color?, format?})
+  // — one line, or several series on one scale with a legend under the chart.
+  function line(el, cfg) {
+    var W = 640, H = 280, padB = 30, padT = 12, padR = 16;
+    var series = cfg.series && cfg.series.length
+      ? cfg.series
+      : [{ label: "", values: cfg.values || [], color: cfg.color }];
+    var all = [];
+    series.forEach(function (s) { all = all.concat(s.values || []); });
+    var max = niceMax(maxOf(all));
+    var axis = yAxisPad(cfg.format, max);
+    var svg = frame(el, W, H);
+    var n = series.reduce(function (m, s) { return Math.max(m, (s.values || []).length); }, 0);
+    var labels = labelsFor(cfg, n);
+    var plotW = W - axis.padL - padR, plotH = H - padT - padB;
+    var f = coerceFormat(cfg.format);
+    drawYAxis(svg, axis, W, padR, padT, plotH);
+    var xs = labels.map(function (_, i) { return axis.padL + (n === 1 ? plotW / 2 : (plotW * i) / (n - 1)); });
+    var every = xLabelStep(labels, n > 1 ? plotW / (n - 1) : plotW);
+    labels.forEach(function (label, i) {
+      if ((n - 1 - i) % every === 0) drawXLabel(svg, label, xs[i], H - 10, W, true);
+    });
+    var colors = series.map(function (s, si) {
+      return s.color || (si === 0 ? (cfg.color || accent()) : seriesPalette[(si - 1) % seriesPalette.length]);
+    });
+    series.forEach(function (s, si) {
+      var color = colors[si];
+      var pts = (s.values || []).map(function (v, i) { return [xs[i], padT + plotH - (finite(v) / max) * plotH]; });
+      var d = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+      svg.appendChild(svgEl("path", { d: d, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }));
+      pts.forEach(function (p, i) {
+        var c = svgEl("circle", { cx: p[0], cy: p[1], r: 3.5, fill: color });
+        var t = svgEl("title", {});
+        t.textContent = (s.label ? s.label + " · " : "") + labels[i] + ": " + f(s.values[i]);
+        c.appendChild(t);
+        svg.appendChild(c);
+      });
+    });
+    if (series.length > 1) {
+      legend(el, series.map(function (s, si) { return { label: s.label, color: colors[si] }; }));
+    }
+  }
+
+  // donut(el, {labels:[], values:[], colors?, format?, center?, centerLabel?, legend?})
+  // — donut with a short total in the centre (compact, in the declared unit)
+  // and, with legend: true, the labels and shares listed under it.
+  function donut(el, cfg) {
+    var W = 320, H = 280, cx = W / 2, cy = H / 2, R = 92, r = 58;
+    var svg = frame(el, W, H);
+    // At 100% of a wide container the donut outgrows the height pages give
+    // the box and spills over the next section: keep it at its own size.
+    svg.style.maxWidth = W + "px";
+    svg.style.margin = "0 auto";
+    var values = cfg.values.map(finite);
+    var labels = labelsFor(cfg, values.length);
+    var sum = values.reduce(function (a, b) { return a + b; }, 0);
+    var total = sum || 1;
+    var palette = cfg.colors || [accent()].concat(seriesPalette);
+    // The hover keeps the full value; the centre has room for a short one.
+    var full = coerceFormat(cfg.format);
+    var short = typeof cfg.format === "function" ? full : cfg.format === "brl" ? fmt.brlCompact : fmt.compact;
+    var a0 = -Math.PI / 2;
+    values.forEach(function (v, i) {
+      var a1 = a0 + (v / total) * Math.PI * 2;
+      var large = a1 - a0 > Math.PI ? 1 : 0;
+      var p = ["M", cx + R * Math.cos(a0), cy + R * Math.sin(a0),
+        "A", R, R, 0, large, 1, cx + R * Math.cos(a1), cy + R * Math.sin(a1),
+        "L", cx + r * Math.cos(a1), cy + r * Math.sin(a1),
+        "A", r, r, 0, large, 0, cx + r * Math.cos(a0), cy + r * Math.sin(a0), "Z"].join(" ");
+      var path = svgEl("path", { d: p, fill: palette[i % palette.length] });
+      var t = svgEl("title", {});
+      t.textContent = labels[i] + ": " + full(v) + " (" + fmt.pct(v / total) + ")";
+      path.appendChild(t);
+      svg.appendChild(path);
+      a0 = a1;
+    });
+    // A share chart has no total worth printing: without its own centre text
+    // the caption alone takes the middle.
+    var text = cfg.center != null ? String(cfg.center) : (cfg.format === "pct" ? "" : short(sum));
+    if (text) {
+      var size = text.length > 9 ? 14 : text.length > 7 ? 17 : 20;
+      var center = svgEl("text", { x: cx, y: cfg.centerLabel ? cy + 1 : cy + 6, "text-anchor": "middle", "font-size": size, "font-weight": 650, fill: "currentColor" });
+      center.textContent = text;
+      svg.appendChild(center);
+    }
+    if (cfg.centerLabel) {
+      var cap = svgEl("text", { x: cx, y: text ? cy + 19 : cy + 5, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      cap.textContent = cfg.centerLabel;
+      svg.appendChild(cap);
+    }
+    if (cfg.legend) {
+      legend(el, labels.map(function (label, i) {
+        return { label: label, color: palette[i % palette.length], value: fmt.pct(values[i] / total) };
+      }));
+    }
+  }
+
+  // ---- Page building blocks: what dashboards and small systems kept
+  // re-implementing — a searchable sortable table, a KPI row, tabs, toasts,
+  // dialogs, saved state and mock data. Every call is opt-in, so a page that
+  // brings its own versions keeps them.
+
+  function resolve(target) {
+    return typeof target === "string" ? document.querySelector(target) : target;
+  }
+
+  function node(tag, className, text) {
+    var el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text != null) el.textContent = text;
+    return el;
+  }
+
+  function isNumberColumn(col) {
+    return col.align === "right" || col.format === "num" || col.format === "brl" || col.format === "pct";
+  }
+
+  function cellText(col, row) {
+    var value = row[col.key];
+    if (value == null) return "";
+    return col.format ? coerceFormat(col.format)(value) : String(value);
+  }
+
+  function compareValues(a, b) {
+    if (typeof a === "number" && typeof b === "number") return a - b;
+    return String(a == null ? "" : a).localeCompare(String(b == null ? "" : b), "pt-BR", { numeric: true });
+  }
+
+  // table(el, {columns, rows, search?, pageSize?, empty?, onRowClick?}) — a
+  // table.shell-table with sortable headers, an optional search box and
+  // pager. A column is {key, label, format?, align?, sortable? (true),
+  // render?(value, row) returning a Node or an HTML string — the page writes
+  // its cell templates as markup}. Plain values are always set as text.
+  // Returns {setRows, rows}.
+  function table(target, cfg) {
+    var root = resolve(target);
+    var cols = cfg.columns || [];
+    var pageSize = cfg.pageSize || 0;
+    var state = { rows: (cfg.rows || []).slice(), query: "", key: null, dir: 1, page: 0 };
+    root.innerHTML = "";
+    if (cfg.search) {
+      var search = node("input", "input skip-table-search");
+      search.type = "search";
+      search.placeholder = typeof cfg.search === "string" ? cfg.search : "Buscar…";
+      search.setAttribute("aria-label", search.placeholder);
+      search.addEventListener("input", function () {
+        state.query = search.value.trim().toLowerCase();
+        state.page = 0;
+        draw();
+      });
+      root.appendChild(search);
+    }
+    var tableEl = node("table", "shell-table");
+    var headRow = node("tr");
+    var heads = cols.map(function (col) {
+      var th = node("th", isNumberColumn(col) ? "num" : "", col.label == null ? col.key : col.label);
+      th.scope = "col";
+      if (col.sortable !== false) {
+        var toggle = function () {
+          state.dir = state.key === col.key ? -state.dir : 1;
+          state.key = col.key;
+          draw();
+        };
+        th.setAttribute("data-sort", col.key);
+        th.tabIndex = 0;
+        th.addEventListener("click", toggle);
+        th.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+        });
+      }
+      headRow.appendChild(th);
+      return th;
+    });
+    var thead = node("thead");
+    var tbody = node("tbody");
+    var wrap = node("div", "skip-table-wrap");
+    var pager = node("div", "skip-pager");
+    thead.appendChild(headRow);
+    tableEl.appendChild(thead);
+    tableEl.appendChild(tbody);
+    wrap.appendChild(tableEl);
+    root.appendChild(wrap);
+    if (pageSize) root.appendChild(pager);
+
+    function visibleRows() {
+      var rows = state.rows;
+      if (state.query) {
+        rows = rows.filter(function (row) {
+          return cols.some(function (col) { return cellText(col, row).toLowerCase().indexOf(state.query) >= 0; });
+        });
+      }
+      if (state.key) {
+        var key = state.key, dir = state.dir;
+        rows = rows.slice().sort(function (a, b) { return dir * compareValues(a[key], b[key]); });
+      }
+      return rows;
+    }
+
+    function drawRow(row) {
+      var tr = node("tr");
+      cols.forEach(function (col) {
+        var td = node("td", isNumberColumn(col) ? "num" : "");
+        if (!col.render) {
+          td.textContent = cellText(col, row);
+        } else {
+          var content = col.render(row[col.key], row);
+          if (content instanceof Node) td.appendChild(content);
+          else td.innerHTML = content == null ? "" : String(content);
+        }
+        tr.appendChild(td);
+      });
+      // The row stays a row (no role) and takes focus, so a keyboard reaches
+      // the same action; keys pressed on a control inside a cell are its own.
+      if (cfg.onRowClick) {
+        tr.style.cursor = "pointer";
+        tr.tabIndex = 0;
+        tr.addEventListener("click", function () { cfg.onRowClick(row); });
+        tr.addEventListener("keydown", function (e) {
+          if (e.target !== tr || (e.key !== "Enter" && e.key !== " ")) return;
+          e.preventDefault();
+          cfg.onRowClick(row);
+        });
+      }
+      return tr;
+    }
+
+    function pagerButton(label, disabled, step) {
+      var button = node("button", "btn", label);
+      button.type = "button";
+      button.setAttribute("data-variant", "outline");
+      button.setAttribute("data-size", "sm");
+      button.disabled = disabled;
+      button.addEventListener("click", function () { state.page += step; draw(); });
+      return button;
+    }
+
+    function draw() {
+      var rows = visibleRows();
+      heads.forEach(function (th, i) {
+        if (cols[i].key === state.key) th.setAttribute("aria-sort", state.dir > 0 ? "ascending" : "descending");
+        else th.removeAttribute("aria-sort");
+      });
+      var pages = pageSize ? Math.max(1, Math.ceil(rows.length / pageSize)) : 1;
+      state.page = Math.min(state.page, pages - 1);
+      var shown = pageSize ? rows.slice(state.page * pageSize, (state.page + 1) * pageSize) : rows;
+      tbody.innerHTML = "";
+      if (!shown.length) {
+        var empty = node("td", "skip-table-empty", cfg.empty || "Nenhum registro encontrado.");
+        empty.colSpan = cols.length;
+        tbody.appendChild(node("tr")).appendChild(empty);
+      }
+      shown.forEach(function (row) { tbody.appendChild(drawRow(row)); });
+      if (!pageSize) return;
+      pager.innerHTML = "";
+      var from = rows.length ? state.page * pageSize + 1 : 0;
+      pager.appendChild(node("span", "", from + "–" + Math.min(rows.length, (state.page + 1) * pageSize) + " de " + rows.length));
+      var nav = node("div", "row gap-2");
+      nav.appendChild(pagerButton("Anterior", state.page === 0, -1));
+      nav.appendChild(pagerButton("Próxima", state.page >= pages - 1, 1));
+      pager.appendChild(nav);
+    }
+
+    draw();
+    return {
+      setRows: function (rows) { state.rows = rows.slice(); draw(); },
+      rows: visibleRows
+    };
+  }
+
+  // kpis(el, [{label, value, format?, delta?, hint?}]) — KPI cards in a
+  // responsive grid; delta is a fraction (0.12 renders as ▲ 12%).
+  function kpis(target, items) {
+    var root = resolve(target);
+    root.innerHTML = "";
+    root.classList.add("shell-grid");
+    items.forEach(function (item) {
+      var card = node("div", "panel kpi");
+      card.appendChild(node("span", "kpi-label", item.label));
+      // Large money values go compact ("R$ 27,5 mi"): the full amount does
+      // not fit a KPI card at four per row.
+      var kpiFormat = item.format === "brl" && Math.abs(item.value) >= 1e6 ? fmt.brlCompact : (item.format ? coerceFormat(item.format) : null);
+      card.appendChild(node("span", "kpi-value", kpiFormat ? kpiFormat(item.value) : String(item.value)));
+      if (typeof item.delta === "number") {
+        var up = item.delta >= 0;
+        card.appendChild(node("span", "kpi-delta " + (up ? "up" : "down"), (up ? "▲ " : "▼ ") + fmt.pct(Math.abs(item.delta))));
+      }
+      if (item.hint) card.appendChild(node("span", "kpi-label", item.hint));
+      root.appendChild(card);
+    });
+  }
+
+  // badge(text, variant?) — a .badge node for table cells and lists;
+  // variant is "secondary" | "outline" | "destructive" (default: primary).
+  function badge(text, variant) {
+    var el = node("span", "badge", text);
+    if (variant) el.setAttribute("data-variant", variant);
+    return el;
+  }
+
+  // tabs(el) — wires one .tabs block: [role=tab] buttons inside
+  // [role=tablist], each with aria-controls naming its [role=tabpanel].
+  function tabs(target) {
+    var root = resolve(target);
+    var buttons = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+    function select(chosen) {
+      buttons.forEach(function (b) {
+        var on = b === chosen;
+        b.setAttribute("aria-selected", on ? "true" : "false");
+        b.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(b.getAttribute("aria-controls"));
+        if (panel) panel.hidden = !on;
+      });
+    }
+    buttons.forEach(function (b, i) {
+      b.addEventListener("click", function () { select(b); });
+      b.addEventListener("keydown", function (e) {
+        var step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (!step) return;
+        var next = buttons[(i + step + buttons.length) % buttons.length];
+        next.focus();
+        select(next);
+      });
+    });
+    select(buttons.filter(function (b) { return b.getAttribute("aria-selected") === "true"; })[0] || buttons[0]);
+  }
+
+  // toast(message, {type?: "success" | "error", title?, duration?}) — a
+  // .toast in a shared .toaster at the bottom of the page.
+  function toast(message, opts) {
+    opts = opts || {};
+    var toaster = document.querySelector(".toaster") || document.body.appendChild(node("div", "toaster"));
+    var item = node("div", "toast");
+    item.setAttribute("role", opts.type === "error" ? "alert" : "status");
+    item.setAttribute("aria-hidden", "true");
+    if (opts.type) item.setAttribute("data-type", opts.type);
+    var content = node("div", "toast-content");
+    var section = node("section");
+    if (opts.title) section.appendChild(node("h2", "", opts.title));
+    section.appendChild(node("p", "", message));
+    content.appendChild(section);
+    item.appendChild(content);
+    toaster.appendChild(item);
+    requestAnimationFrame(function () { item.setAttribute("aria-hidden", "false"); });
+    setTimeout(function () {
+      item.setAttribute("aria-hidden", "true");
+      setTimeout(function () { item.remove(); }, 400);
+    }, opts.duration || 3000);
+  }
+
+  // Dialogs are native <dialog class="dialog">: a [data-dialog-open="id"]
+  // anywhere opens one, a [data-dialog-close] inside closes it, and a click on
+  // its backdrop closes it too. Plain dialog.showModal()/close() still work.
+  document.addEventListener("click", function (e) {
+    var target = e.target;
+    if (!(target instanceof Element)) return;
+    var opener = target.closest("[data-dialog-open]");
+    if (opener) {
+      var dialog = document.getElementById(opener.getAttribute("data-dialog-open"));
+      if (dialog && dialog.showModal && !dialog.open) dialog.showModal();
+      return;
+    }
+    var closer = target.closest("[data-dialog-close]");
+    if (closer && closer.closest("dialog")) {
+      closer.closest("dialog").close();
+      return;
+    }
+    if (target.tagName === "DIALOG" && target.classList.contains("dialog") && target.open) target.close();
+  });
+
+  // store(key, fallback) — JSON state in localStorage that never throws (a
+  // private window or a full quota falls back to memory): {get, set, update}.
+  function store(key, fallback) {
+    var memory;
+    // Set while the last write did not reach localStorage: what is stored
+    // there is older than memory until a write goes through again.
+    var unsaved = false;
+    var initial = function () { return fallback === undefined ? undefined : JSON.parse(JSON.stringify(fallback)); };
+    function get() {
+      if (!unsaved) {
+        try {
+          var raw = localStorage.getItem(key);
+          if (raw != null) return JSON.parse(raw);
+        } catch (e) { /* storage unavailable: memory below */ }
+      }
+      return memory !== undefined ? memory : initial();
+    }
+    function set(value) {
+      memory = value;
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        unsaved = false;
+      } catch (e) {
+        unsaved = true;
+      }
+      return value;
+    }
+    return { get: get, set: set, update: function (fn) { return set(fn(get())); } };
+  }
+
+  // mock — seeded random data, so a page asks for 90 days of numbers in one
+  // line instead of writing them out; the same seed gives the same data.
+  var FIRST = ["Ana", "Bruno", "Carla", "Diego", "Eduarda", "Felipe", "Gabriela", "Henrique", "Isabela", "João",
+    "Larissa", "Marcos", "Natália", "Otávio", "Paula", "Rafael", "Sofia", "Thiago", "Vanessa", "Lucas"];
+  var LAST = ["Silva", "Santos", "Oliveira", "Souza", "Pereira", "Costa", "Rodrigues", "Almeida", "Nascimento", "Lima",
+    "Araújo", "Fernandes", "Carvalho", "Gomes", "Martins", "Rocha", "Ribeiro", "Barbosa"];
+  var INITIALS = "ABCDEFGHIJLMNOPRSTV".split("");
+  var CITIES = ["São Paulo, SP", "Rio de Janeiro, RJ", "Belo Horizonte, MG", "Curitiba, PR", "Porto Alegre, RS",
+    "Salvador, BA", "Recife, PE", "Fortaleza, CE", "Brasília, DF", "Goiânia, GO", "Campinas, SP", "Florianópolis, SC",
+    "Manaus, AM", "Belém, PA", "Vitória, ES", "Natal, RN"];
+
+  function createMock(seed) {
+    var state = seed >>> 0;
+    var names = 0;
+    function random() {
+      state = (state + 0x6d2b79f5) >>> 0;
+      var t = state;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+    function int(min, max) { return min + Math.floor(random() * (max - min + 1)); }
+    function pick(list) { return list[Math.floor(random() * list.length)]; }
+    var mock = {
+      seed: function (value) { state = value >>> 0; names = 0; return mock; },
+      random: random,
+      int: int,
+      float: function (min, max, decimals) {
+        var factor = Math.pow(10, decimals == null ? 2 : decimals);
+        return Math.round((min + random() * (max - min)) * factor) / factor;
+      },
+      pick: pick,
+      chance: function (p) { return random() < p; },
+      // There are 360 first/last pairs. A page that draws until the name is
+      // new (do { … } while (used.has(name))) froze the tab past them, so
+      // later draws widen the space: a second surname after 200 (6,480), a
+      // middle initial after 4,000.
+      name: function () {
+        names++;
+        var middle = names > 4000 ? pick(INITIALS) + ". " : "";
+        return pick(FIRST) + " " + middle + (names > 200 ? pick(LAST) + " " : "") + pick(LAST);
+      },
+      city: function () { return pick(CITIES); },
+      // series(n, {start, trend, noise, min, decimals}) — a walk: each value
+      // moves by trend (fraction per step) plus up to ±noise of itself.
+      series: function (n, opts) {
+        opts = opts || {};
+        var value = opts.start == null ? 100 : opts.start;
+        var factor = Math.pow(10, opts.decimals || 0);
+        var out = [];
+        for (var i = 0; i < n; i++) {
+          out.push(Math.max(opts.min == null ? 0 : opts.min, Math.round(value * factor) / factor));
+          value = value * (1 + (opts.trend || 0)) * (1 + (random() * 2 - 1) * (opts.noise == null ? 0.08 : opts.noise));
+        }
+        return out;
+      },
+      // dates(n, {end?, step?: "day" | "week" | "month"}) — ISO dates
+      // (YYYY-MM-DD), oldest first, ending at end (default: today).
+      dates: function (n, opts) {
+        opts = opts || {};
+        var end = opts.end ? new Date(opts.end) : new Date();
+        var out = [];
+        for (var i = n - 1; i >= 0; i--) {
+          var d = new Date(end.getTime());
+          if (opts.step === "month") d.setMonth(d.getMonth() - i);
+          else d.setDate(d.getDate() - i * (opts.step === "week" ? 7 : 1));
+          out.push(d.toISOString().slice(0, 10));
+        }
+        return out;
+      },
+      // rows(n, spec) — n objects; each spec value is a function(i), a list
+      // to pick from, or a constant.
+      rows: function (n, spec) {
+        var out = [];
+        for (var i = 0; i < n; i++) {
+          var row = {};
+          for (var key in spec) {
+            var value = spec[key];
+            row[key] = typeof value === "function" ? value(i) : Array.isArray(value) ? pick(value) : value;
+          }
+          out.push(row);
+        }
+        return out;
+      }
+    };
+    return mock;
+  }
+
+  window.skipShell = { fmt: fmt };
+  window.skipChart = { bar: bar, line: line, donut: donut };
+  window.skipUI = { table: table, kpis: kpis, badge: badge, tabs: tabs, toast: toast };
+  window.skipStore = store;
+  window.skipMock = createMock(20261022);
+})();
+
+</script>
+<style>
+:root {
+  --accent: #1d4ed8;
+  --accent-text: #1e40af;
+  --accent-contrast: #ffffff;
+  --warn-bg: #fef3c7;
+  --warn-text: #78350f;
+  --warn-border: #f59e0b;
+  --ok-bg: #dcfce7;
+  --ok-text: #14532d;
+  --bad-bg: #fee2e2;
+  --bad-text: #7f1d1d;
+  --info-bg: #dbeafe;
+  --info-text: #1e3a8a;
+  --zero-bg: #e0e7ff;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+html, body { max-width: 100%; overflow-x: hidden; }
+body { font-family: var(--font-sans); background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; font-size: 14px; line-height: 1.45; }
+[hidden] { display: none !important; }
+button, a, select, [role="tab"] { cursor: pointer; }
+*, *::before, *::after { box-sizing: border-box; }
+.screen { min-height: 100vh; }
+
+/* ---------- Telas de autenticação ---------- */
+.auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; background: linear-gradient(160deg, #eff6ff 0%, #f8fafc 60%); }
+.auth-card { width: 100%; max-width: 440px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 18px 40px rgba(15,23,42,.08); padding: 28px 24px; }
+.auth-brand { width: 48px; height: 48px; border-radius: 12px; background: var(--accent); color: var(--accent-contrast); display: grid; place-items: center; font-weight: 700; font-size: 1.1rem; margin-bottom: 14px; }
+.auth-title { font-size: 1.35rem; font-weight: 700; margin: 0 0 4px; }
+.auth-sub { color: var(--text-muted); font-size: .92rem; margin: 0 0 18px; }
+.auth-form { display: grid; gap: 14px; }
+.auth-foot { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; font-size: .85rem; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--accent-text); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.link-btn:focus-visible, .btn:focus-visible, .input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+.conn-url { font-size: .72rem; color: var(--text-muted); margin-top: 14px; word-break: break-all; text-align: center; }
+.helper { font-size: .78rem; color: var(--text-muted); margin: 4px 0 0; }
+.field-error { font-size: .8rem; color: var(--bad-text); margin: 4px 0 0; }
+.inline-msg { border-radius: 8px; padding: 10px 12px; font-size: .88rem; border: 1px solid transparent; }
+.inline-msg.err { background: var(--bad-bg); color: var(--bad-text); border-color: #fca5a5; }
+.inline-msg.ok { background: var(--ok-bg); color: var(--ok-text); border-color: #86efac; }
+.inline-msg.warn { background: var(--warn-bg); color: var(--warn-text); border-color: var(--warn-border); }
+.inline-msg.info { background: var(--info-bg); color: var(--info-text); border-color: #93c5fd; }
+details.tech { margin-top: 8px; font-size: .8rem; }
+details.tech pre { white-space: pre-wrap; word-break: break-word; background: #0f172a; color: #e2e8f0; padding: 8px; border-radius: 6px; font-size: .74rem; }
+.pw-row { position: relative; }
+.pw-row .input { padding-right: 76px; width: 100%; }
+.pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: .75rem; cursor: pointer; }
+.spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; display: inline-block; animation: spin .8s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Banner de modo demo / aviso de perfil ---------- */
+.demo-banner { position: sticky; top: 0; z-index: 60; background: #7c3aed; color: #fff; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; font-size: .9rem; }
+.demo-banner .btn { background: #fff; color: #5b21b6; }
+.profile-banner { background: var(--warn-bg); color: var(--warn-text); border-bottom: 1px solid var(--warn-border); padding: 10px 16px; font-size: .9rem; }
+
+/* ---------- App shell ---------- */
+.app-layout { display: block; min-height: 100vh; }
+.sidebar { background: #0f172a; color: #e2e8f0; padding: 18px 12px; position: fixed; top: 0; left: 0; width: 240px; height: 100vh; overflow-y: auto; z-index: 70; }
+.menu-btn, .account-btn { display: none; width: 44px; height: 44px; min-width: 44px; align-items: center; justify-content: center; background: none; border: 0; border-radius: 10px; color: var(--text); cursor: pointer; font: inherit; }
+.account-btn { border-radius: 50%; background: var(--accent); color: var(--accent-contrast); font-weight: 700; }
+.account-wrap { position: relative; }
+.account-menu { position: absolute; right: 0; top: 50px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; min-width: 220px; box-shadow: 0 12px 30px rgba(15,23,42,.18); z-index: 90; }
+.account-menu[hidden] { display: none; }
+.drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 75; }
+.drawer-close { display: none; width: 44px; height: 44px; background: none; border: 0; color: #fff; font-size: 1.4rem; cursor: pointer; margin-left: auto; }
+.sidebar .brand { font-weight: 700; padding: 6px 10px 18px; color: #fff; font-size: 1rem; }
+.nav-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; background: none; border: 0; color: #cbd5e1; padding: 10px 12px; border-radius: 8px; font: inherit; text-align: left; cursor: pointer; }
+.nav-item:hover { background: #1e293b; color: #fff; }
+.nav-item[aria-current="page"] { background: #1e40af; color: #fff; }
+.nav-item:focus-visible { outline: 3px solid #93c5fd; outline-offset: 1px; }
+.nav-count { background: #dc2626; color: #fff; border-radius: 999px; padding: 1px 8px; font-size: .72rem; font-weight: 600; }
+.main-area { min-width: 0; display: flex; flex-direction: column; margin-left: 240px; max-width: calc(100% - 0px); }
+.main-area > * { min-width: 0; }
+@media (max-width: 768px) {
+  .sidebar { width: min(78%, 300px); transform: translateX(-100%); transition: transform .25s ease; z-index: 80; box-shadow: 4px 0 24px rgba(0,0,0,.3); }
+  body.drawer-open .sidebar { transform: translateX(0); }
+  body.drawer-open { overflow: hidden; }
+  body.drawer-open .drawer-overlay { display: block; }
+  .drawer-close { display: inline-flex; align-items: center; justify-content: center; }
+  .menu-btn { display: inline-flex; }
+  .account-btn { display: inline-flex; }
+  .main-area { margin-left: 0; }
+  .topbar { position: fixed; top: 0; left: 0; right: 0; height: 56px; padding: 0 12px; flex-wrap: nowrap; align-items: center; z-index: 60; }
+  .topbar > div:first-child { display: none; }
+  .topbar #user-box { display: none; }
+  .topbar .menu-title { display: block; font-weight: 700; font-size: 15px; }
+  .page { padding: 72px 16px 24px; }
+  .account-wrap .account-menu { right: 0; }
+  .footer-bar { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
+@media (min-width: 769px) {
+  .topbar .menu-title { display: none; }
+}
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
+.eyebrow-pill { display: inline-block; background: var(--info-bg); color: var(--info-text); font-size: .74rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+.page { padding: 20px; flex: 1; min-width: 0; }
+.page-title { font-size: clamp(20px, 5.5vw, 26px); font-weight: 700; margin: 0; overflow-wrap: break-word; }
+.page-sub { color: var(--text-muted); font-size: 13px; margin: 4px 0 0; }
+.card-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(15,23,42,.04); box-sizing: border-box; width: 100%; min-width: 0; overflow-wrap: break-word; }
+.card-box h2 { font-size: 1rem; margin: 0; font-weight: 600; }
+.card-box .sub { color: var(--text-muted); font-size: .82rem; margin: 2px 0 12px; }
+.grid-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.kpi-big { font-size: 1.8rem; font-weight: 700; color: var(--accent-text); line-height: 1.1; }
+.kpi-cap { color: var(--text-muted); font-size: .8rem; margin-top: 4px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.grid-2 > * { min-width: 0; }
+@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {
+  .page { padding: 72px 16px 24px; }
+  .card-box { padding: 14px; }
+  .grid-kpi { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  .grid-kpi .kpi-big { font-size: clamp(22px, 7vw, 32px); }
+  .card-box .kpi-cap { font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+  .bar-row { grid-template-columns: 90px 1fr 44px; font-size: 12px; gap: 8px; }
+  .bar-row > span { font-size: 12px; }
+  .cal { gap: 2px; }
+  .cal-d { min-height: 44px; font-size: 11px; padding: 2px; position: relative; }
+  .cal-d .n { font-size: 11px; }
+  .cal-chip { width: 6px; height: 6px; padding: 0; border-radius: 50%; display: inline-block; text-indent: -9999px; margin: 1px 1px 0 0; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar .input, .toolbar select { max-width: none !important; width: 100%; min-height: 44px; }
+  .input, select, textarea { width: 100%; font-size: 16px; padding: 12px; min-height: 44px; }
+  .btn, button.btn { min-height: 44px; padding: 0 16px; font-size: 15px; }
+  .timeline li { grid-template-columns: 28px 1fr; }
+  .modal-bg { padding: 0; align-items: stretch; }
+  .modal { max-width: none; width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; padding: 0; display: flex; flex-direction: column; }
+  .chat-box { height: calc(100dvh - 220px); min-height: 240px; }
+  .chip-row { flex-direction: column; }
+  .chip-row .chip { text-align: left; min-height: 44px; width: 100%; }
+  .msg { max-width: 92%; }
+}
+.badge-f { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .74rem; font-weight: 600; white-space: nowrap; }
+.f-azul { background: #dbeafe; color: #1e3a8a; }
+.f-verde { background: var(--ok-bg); color: var(--ok-text); }
+.f-amarelo { background: var(--warn-bg); color: var(--warn-text); }
+.f-vermelho { background: var(--bad-bg); color: var(--bad-text); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.toolbar .input { max-width: 220px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); max-width: 100%; }
+table.data { width: 100%; border-collapse: collapse; font-size: .86rem; }
+table.data th, table.data td { padding: 9px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+table.data th { background: #f8fafc; font-weight: 600; color: var(--text-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+.mobile-cards { display: none; gap: 10px; flex-direction: column; }
+@media (max-width: 768px) {
+  .table-wrap.pedidos-table { display: none; }
+  .mobile-cards { display: flex; }
+}
+.pcard { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 10px; padding: 12px; box-sizing: border-box; width: 100%; min-width: 0; overflow-wrap: break-word; }
+.pcard .row-top strong { font-size: 15px; }
+.pcard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.pcard-grid .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .03em; }
+.pcard-grid .val { font-size: 13px; }
+.pcard.risk-vermelho { border-left-color: #dc2626; }
+.pcard.risk-amarelo { border-left-color: #f59e0b; }
+.pcard.risk-verde { border-left-color: #16a34a; }
+.pcard.risk-azul { border-left-color: #1d4ed8; }
+@media (max-width: 768px) {
+  .pcard .actions .btn { flex: 1 1 100%; }
+  .pcard .actions .btn[data-size="sm"] { min-width: 44px; }
+}
+.pcard .row-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.pcard .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.bar { height: 10px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .4s ease; }
+.bar-row { display: grid; grid-template-columns: 130px 1fr 52px; gap: 10px; align-items: center; font-size: .85rem; margin-bottom: 8px; }
+.timeline { list-style: none; padding: 0; margin: 0; }
+.timeline li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding-bottom: 14px; position: relative; }
+.timeline li::before { content: ""; position: absolute; left: 13px; top: 28px; bottom: 0; width: 2px; background: var(--border); }
+.timeline li:last-child::before { display: none; }
+.tl-dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: .78rem; font-weight: 700; background: #e2e8f0; color: #334155; }
+.tl-dot.done { background: #16a34a; color: #fff; }
+.tl-dot.current { background: var(--accent); color: #fff; box-shadow: 0 0 0 4px #bfdbfe; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-h { font-size: .72rem; font-weight: 600; color: var(--text-muted); text-align: center; padding: 4px 0; }
+.cal-d { min-height: 62px; border-radius: 8px; padding: 4px; font-size: .75rem; border: 1px solid var(--border); background: var(--surface); overflow: hidden; }
+.cal-d.mute { opacity: .4; }
+.cal-d .n { font-weight: 600; display: block; margin-bottom: 2px; }
+.cal-chip { display: block; border-radius: 4px; padding: 1px 4px; font-size: .68rem; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-item { border-left: 3px solid var(--accent); padding: 6px 10px; margin-bottom: 8px; background: #f8fafc; border-radius: 0 8px 8px 0; font-size: .85rem; }
+.chat-box { height: 360px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+.msg { max-width: 85%; padding: 10px 12px; border-radius: 12px; font-size: .88rem; line-height: 1.45; white-space: pre-wrap; }
+.msg.user { align-self: flex-end; background: var(--accent); color: var(--accent-contrast); }
+.msg.bot { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.chip { background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: .8rem; cursor: pointer; color: var(--text); }
+.chip:hover { border-color: var(--accent); color: var(--accent-text); }
+.chip:focus-visible { outline: 3px solid #93c5fd; }
+.alert-item { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 8px; background: var(--surface); }
+.ch-card { border: 1px dashed var(--border-strong, #94a3b8); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 8px; }
+.empty { text-align: center; color: var(--text-muted); padding: 24px; font-size: .9rem; }
+.modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 80; }
+.modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 25px 50px rgba(0,0,0,.25); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid .full { grid-column: 1 / -1; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+.footer-bar { border-top: 1px solid var(--border); padding: 12px 20px; font-size: .78rem; color: var(--text-muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; background: var(--surface); }
+@media (max-width: 768px) { .footer-bar { font-size: 12px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); } }
+.report-page { background: #fff; color: #000; padding: 24px; border: 1px solid var(--border); border-radius: 10px; }
+.report-head { border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; }
+.report-head h1 { font-size: 1.3rem; margin: 0; }
+.report-meta { font-size: .8rem; color: #333; }
+.rep-table { width: 100%; border-collapse: collapse; font-size: .78rem; color: #000; }
+.rep-table th, .rep-table td { border: 1px solid #555; padding: 4px 5px; text-align: left; vertical-align: top; }
+.rep-table th { background: #e5e5e5; }
+.rep-table tr { break-inside: avoid; }
+.rep-h2 { font-size: 1rem; margin: 16px 0 6px; border-bottom: 1px solid #000; }
+.rep-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 8px; font-size: .85rem; }
+.rep-sum div { border: 1px solid #000; padding: 6px; }
+.print-only { display: none; }
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body { background: #fff !important; color: #000 !important; }
+  .sidebar, .topbar, .demo-banner, .profile-banner, .footer-bar, .no-print, .btn, button, .toolbar, .drawer-overlay { display: none !important; }
+  .app-layout { display: block; }
+  .main-area { margin-left: 0 !important; }
+  .page { padding: 0 !important; }
+  .main-area, .page { padding: 0 !important; }
+  .report-page { border: 0; padding: 0; }
+  .rep-table th { background: #ddd !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .rep-table thead { display: table-header-group; }
+  .rep-table tr { page-break-inside: avoid; }
+  .rep-h2 { page-break-after: avoid; }
+  .print-only { display: block; }
+  .rep-page-break { page-break-before: always; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= ESTADO SETUP ================= -->
+<section id="state-setup" class="screen auth-wrap" hidden aria-labelledby="setup-title">
+  <div class="auth-card">
+    <div class="auth-brand" aria-hidden="true">SDP</div>
+    <span class="eyebrow-pill">Primeiro acesso</span>
+    <h1 id="setup-title" class="auth-title" style="margin-top:10px">Bem-vindo ao Supervisor Digital de Produção</h1>
+    <p class="auth-sub">Conecte o sistema ao seu projeto Supabase para carregar pedidos, etapas e perfis da equipe.</p>
+    <form id="form-setup" class="auth-form" novalidate>
+      <div>
+        <label for="setup-url">URL do projeto</label>
+        <input class="input" id="setup-url" type="url" placeholder="https://SEU-PROJETO.supabase.co" autocomplete="off" required>
+        <p class="helper">Formato: https://SEU-PROJETO.supabase.co, sem barra no final.</p>
+        <p class="field-error" id="err-setup-url" hidden></p>
+      </div>
+      <div>
+        <label for="setup-key">Chave anon / public</label>
+        <input class="input" id="setup-key" type="text" placeholder="eyJhbGciOiJIUzI1NiIs..." autocomplete="off" required>
+        <p class="helper">Use a chave anon public do painel do Supabase (Project Settings › API).</p>
+        <p class="field-error" id="err-setup-key" hidden></p>
+      </div>
+      <div id="setup-msg" hidden></div>
+      <button type="submit" class="btn" id="btn-setup" style="height:44px">Conectar e entrar</button>
+    </form>
+    <div class="auth-foot">
+      <span class="muted">Ainda não tem projeto?</span>
+      <button type="button" class="link-btn" id="btn-demo-start">Explorar demonstração</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ESTADO LOGIN ================= -->
+<section id="state-login" class="screen auth-wrap" hidden aria-labelledby="login-title">
+  <div class="auth-card">
+    <div class="auth-brand" aria-hidden="true">SDP</div>
+    <h1 id="login-title" class="auth-title">Supervisor Digital de Produção</h1>
+    <p class="auth-sub" id="login-sub">Entre com sua conta da equipe</p>
+
+    <form id="form-login" class="auth-form" novalidate>
+      <div>
+        <label for="login-email">E-mail</label>
+        <input class="input" id="login-email" type="email" autocomplete="username" placeholder="voce@empresa.com.br" required>
+        <p class="field-error" id="err-login-email" hidden></p>
+      </div>
+      <div>
+        <label for="login-password">Senha</label>
+        <div class="pw-row">
+          <input class="input" id="login-password" type="password" autocomplete="current-password" placeholder="Sua senha" required>
+          <button type="button" class="pw-toggle" data-pw="login-password" aria-label="Mostrar ou ocultar senha">Mostrar</button>
+        </div>
+        <p class="helper">Use a senha cadastrada no Supabase Auth.</p>
+        <p class="field-error" id="err-login-password" hidden></p>
+      </div>
+      <div id="login-msg" hidden></div>
+      <button type="submit" class="btn" id="btn-login" style="height:46px;font-size:1rem">Entrar</button>
+    </form>
+
+    <form id="form-signup" class="auth-form" novalidate hidden>
+      <div>
+        <label for="signup-name">Nome</label>
+        <input class="input" id="signup-name" type="text" placeholder="Seu nome completo" required>
+      </div>
+      <div>
+        <label for="signup-email">E-mail</label>
+        <input class="input" id="signup-email" type="email" autocomplete="username" placeholder="voce@empresa.com.br" required>
+        <p class="field-error" id="err-signup-email" hidden></p>
+      </div>
+      <div>
+        <label for="signup-password">Senha</label>
+        <div class="pw-row">
+          <input class="input" id="signup-password" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" required>
+          <button type="button" class="pw-toggle" data-pw="signup-password" aria-label="Mostrar ou ocultar senha">Mostrar</button>
+        </div>
+        <p class="field-error" id="err-signup-password" hidden></p>
+      </div>
+      <div>
+        <label for="signup-password2">Confirmar senha</label>
+        <input class="input" id="signup-password2" type="password" autocomplete="new-password" placeholder="Repita a senha" required>
+        <p class="field-error" id="err-signup-password2" hidden></p>
+      </div>
+      <div id="signup-msg" hidden></div>
+      <button type="submit" class="btn" id="btn-signup" style="height:46px">Criar conta</button>
+      <div class="auth-foot">
+        <span class="muted">Já tem conta?</span>
+        <button type="button" class="link-btn" id="btn-to-login">Entrar</button>
+      </div>
+    </form>
+
+    <div class="auth-foot" id="login-foot">
+      <button type="button" class="link-btn" id="btn-to-signup">Não tem conta? Criar conta</button>
+      <button type="button" class="link-btn" id="btn-back-setup">Configurar conexão</button>
+    </div>
+    <p class="conn-url" id="login-conn-url"></p>
+  </div>
+</section>
+
+<!-- ================= ESTADO APP / DEMO ================= -->
+<div id="state-app" class="app-layout" hidden>
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+<aside class="sidebar no-print" aria-label="Menu principal">
+  <div class="row between"><div class="brand">Supervisor Digital</div><button type="button" class="drawer-close" id="drawer-close" aria-label="Fechar menu">✕</button></div>
+  <nav id="nav-menu" class="stack gap-1"></nav>
+</aside>
+
+  <div class="main-area">
+    <div id="demo-banner" class="demo-banner" role="status" hidden>
+      <span>Modo demonstração — dados fictícios, nada é salvo no banco</span>
+      <button class="btn" type="button" id="btn-demo-connect">Conectar ao Supabase</button>
+    </div>
+    <div id="profile-banner" class="profile-banner" role="alert" hidden>
+      Seu perfil não foi encontrado na tabela perfis. Peça ao administrador para criar seu registro com o papel adequado.
+    </div>
+
+    <header class="topbar no-print">
+      <button type="button" class="menu-btn" id="btn-menu" aria-label="Abrir menu" aria-expanded="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <span class="menu-title">Supervisor Digital</span>
+      <div>
+        <span class="eyebrow-pill" id="top-eyebrow">Produção em tempo real</span>
+        <h1 class="page-title" id="page-title">Dashboard</h1>
+        <p class="page-sub" id="page-sub">Visão geral dos pedidos ativos e prazos.</p>
+      </div>
+      <div class="row gap-2 items-center" id="user-box">
+        <span class="muted text-sm" id="user-email"></span>
+        <button type="button" class="btn" data-variant="outline" data-size="sm" id="btn-logout">Sair</button>
+      </div>
+      <div class="account-wrap" id="account-wrap">
+        <button type="button" class="account-btn" id="btn-account" aria-label="Menu da conta" aria-expanded="false">?</button>
+        <div class="account-menu" id="account-menu" hidden>
+          <p class="muted text-sm" id="account-email" style="margin:0 0 10px;word-break:break-all"></p>
+          <button type="button" class="btn" data-variant="outline" id="btn-account-logout" style="width:100%">Sair</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page" id="page-main" tabindex="-1"></main>
+
+    <footer class="footer-bar no-print">
+      <span>Supervisor Digital de Produção • v2.0.0</span>
+      <span id="footer-state">—</span>
+    </footer>
+  </div>
+</div>
+
+<!-- Modal de pedido -->
+<dialog class="dialog" id="dlg-pedido" aria-labelledby="dlg-pedido-title">
+  <div>
+    <header>
+      <h2 id="dlg-pedido-title">Novo pedido</h2>
+      <p class="muted text-sm">Preencha os dados do pedido. Campos marcados são obrigatórios.</p>
+    </header>
+    <section>
+      <form id="form-pedido" class="form-grid" novalidate>
+        <div><label for="p-numero">Número *</label><input class="input" id="p-numero" required placeholder="PED-2040"><p class="field-error" id="err-p-numero" hidden></p></div>
+        <div><label for="p-cliente">Cliente *</label><input class="input" id="p-cliente" required placeholder="Ex.: Moda Litoral Ltda"><p class="field-error" id="err-p-cliente" hidden></p></div>
+        <div><label for="p-produto">Produto *</label><input class="input" id="p-produto" required placeholder="Ex.: Camiseta polo algodão"><p class="field-error" id="err-p-produto" hidden></p></div>
+        <div><label for="p-quantidade">Quantidade *</label><input class="input" id="p-quantidade" type="number" min="1" required placeholder="500"><p class="field-error" id="err-p-quantidade" hidden></p></div>
+        <div><label for="p-produzida">Quantidade produzida</label><input class="input" id="p-produzida" type="number" min="0" value="0"><p class="helper">Não pode passar da quantidade total.</p><p class="field-error" id="err-p-produzida" hidden></p></div>
+        <div><label for="p-entrada">Data de entrada *</label><input class="input" id="p-entrada" type="date" required><p class="field-error" id="err-p-entrada" hidden></p></div>
+        <div><label for="p-prometida">Data prometida *</label><input class="input" id="p-prometida" type="date" required><p class="field-error" id="err-p-prometida" hidden></p></div>
+        <div><label for="p-responsavel">Responsável</label><input class="input" id="p-responsavel" placeholder="Ex.: Marcos Vieira"></div>
+        <div><label for="p-setor">Setor atual</label><select class="input" id="p-setor"></select></div>
+        <div class="full"><label for="p-obs">Observações</label><textarea class="input" id="p-obs" rows="3" placeholder="Instruções especiais, cores, embalagem..."></textarea></div>
+        <div class="full" id="dlg-pedido-msg"></div>
+        <div class="full row between">
+          <button type="button" class="btn" data-variant="outline" id="btn-cancel-pedido">Cancelar</button>
+          <button type="submit" class="btn" id="btn-save-pedido">Salvar pedido</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</dialog>
+
+<script>
+/* =====================================================================
+   SUPERVISOR DIGITAL DE PRODUÇÃO — v2.0.0
+   Autenticação Supabase real via fetch, motor de prazos determinístico,
+   telas: dashboard, pedidos, detalhe, alertas, assistente, relatório, config.
+   ===================================================================== */
+
+/* ---------- Constantes ---------- */
+const VERSAO = '2.0.0';
+const ETAPAS_PADRAO = [
+  { nome: 'Criação e Aprovação da Arte', ordem: 1, tempo: 1 },
+  { nome: 'Corte', ordem: 2, tempo: 1 },
+  { nome: 'Estamparia', ordem: 3, tempo: 2 },
+  { nome: 'Costura', ordem: 4, tempo: 3 },
+  { nome: 'Acabamento', ordem: 5, tempo: 1 },
+  { nome: 'Conferência e Embalagem', ordem: 6, tempo: 1 },
+  { nome: 'Expedição e Entrega', ordem: 7, tempo: 1 }
+];
+const NOMES_SETORES = ETAPAS_PADRAO.map(e => e.nome);
+
+/* ---------- Estado global ---------- */
+const S = {
+  modo: 'setup',          // 'setup' | 'login' | 'app' | 'demo'
+  url: '', key: '',
+  token: '', refresh: '',
+  user: null,             // { id, email }
+  perfil: null,           // { papel, setor, nome } ou null
+  somenteLeitura: false,
+  pagina: 'dashboard',
+  dados: { config: null, pedidos: [], etapas: [], historico: [], perfis: [], alertasLidos: [] },
+  busca: '', filtroStatus: '', filtroSetor: '', filtroFaixa: '',
+  detalheId: null,
+  chatMsgs: [],
+  ultimoRelatorio: null
+};
+
+/* ---------- Utilitários ---------- */
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hojeISO = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+const parseISO = (s) => { if (!s) return null; const [y,m,d] = String(s).slice(0,10).split('-').map(Number); return new Date(y, m-1, d); };
+const fmtData = (s) => { const d = parseISO(s); if (!d) return '—'; return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear(); };
+const fmtDataHora = (s) => { if (!s) return '—'; const d = new Date(s); return fmtData(d.toISOString().slice(0,10)) + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+const fmtNum = (n) => window.skipShell ? window.skipShell.fmt.num(n) : String(n);
+const iso = (d) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const diasEntre = (a, b) => Math.round((b - a) / 86400000);
+
+function show(id) {
+  ['state-setup','state-login','state-app'].forEach(x => { const el = document.getElementById(x); if (el) el.hidden = (x !== id); });
+}
+function setMsg(el, tipo, texto, tecnico) {
+  if (!el) return;
+  el.hidden = false;
+  el.className = 'inline-msg ' + tipo;
+  el.innerHTML = '<div>' + esc(texto) + '</div>' + (tecnico ? '<details class="tech"><summary>Detalhe técnico</summary><pre>' + esc(tecnico) + '</pre></details>' : '');
+}
+function clearMsg(el) { if (el) { el.hidden = true; el.innerHTML = ''; } }
+function setBusy(btn, busy, textoBusy) {
+  if (!btn) return;
+  if (busy) { btn.dataset.txt = btn.textContent; btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>' + esc(textoBusy || 'Aguarde...'); }
+  else { btn.disabled = false; btn.textContent = btn.dataset.txt || btn.textContent; }
+}
+function setFooter(txt) { const f = $('#footer-state'); if (f) f.textContent = txt; }
+
+/* ---------- Tradução de erros Supabase ---------- */
+function traduzirErroAuth(status, body, fallback) {
+  const raw = (body && (body.msg || body.error_description || body.error || body.message)) || (fallback || 'Erro desconhecido');
+  const r = String(raw);
+  if (/Invalid login credentials/i.test(r)) return { txt: 'E-mail ou senha incorretos.', raw };
+  if (/Email not confirmed/i.test(r)) return { txt: 'Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.', raw };
+  if (/User already registered/i.test(r)) return { txt: 'Este e-mail já tem conta. Use Entrar.', raw };
+  return { txt: null, raw: r };
+}
+function traduzirErroDados(status, body) {
+  const code = body && body.code;
+  const msg = String((body && (body.message || body.msg)) || '');
+  if (status === 401) return 'Sessão expirada. Entre novamente.';
+  if (code === '42501' || /policy/i.test(msg) || /row-level security/i.test(msg)) return 'Sem permissão para acessar estes dados. Verifique se seu perfil existe na tabela perfis.';
+  return null;
+}
+class ErroApi extends Error {
+  constructor(status, body, humano) {
+    super(humano || (body && (body.message || body.msg || body.error_description)) || ('HTTP ' + status));
+    this.status = status; this.body = body; this.raw = JSON.stringify(body || {});
+  }
+}
+
+/* ---------- Camada de rede Supabase (fetch) ---------- */
+async function httpJSON(url, opts) {
+  let res;
+  try { res = await fetch(url, opts); }
+  catch (e) { throw new ErroApi(0, { message: String(e && e.message || e) }, 'Não foi possível conectar ao Supabase. Verifique a URL do projeto (deve ser https://SEU-PROJETO.supabase.co, sem barra no final).'); }
+  let body = null;
+  const txt = await res.text();
+  try { body = txt ? JSON.parse(txt) : null; } catch (_) { body = { message: txt }; }
+  if (!res.ok) throw new ErroApi(res.status, body);
+  return { status: res.status, body };
+}
+const hdrsAnon = () => ({ apikey: S.key, 'Content-Type': 'application/json' });
+const hdrsAuth = () => ({ apikey: S.key, Authorization: 'Bearer ' + S.token, 'Content-Type': 'application/json' });
+
+async function authLogin(email, password) {
+  return httpJSON(S.url + '/auth/v1/token?grant_type=password', { method: 'POST', headers: hdrsAnon(), body: JSON.stringify({ email, password }) });
+}
+async function authSignup(email, password, nome) {
+  return httpJSON(S.url + '/auth/v1/signup', { method: 'POST', headers: hdrsAnon(), body: JSON.stringify({ email, password, data: { nome } }) });
+}
+async function authUser() {
+  return httpJSON(S.url + '/auth/v1/user', { method: 'GET', headers: hdrsAuth() });
+}
+async function authRefresh() {
+  return httpJSON(S.url + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: hdrsAnon(), body: JSON.stringify({ refresh_token: S.refresh }) });
+}
+async function authLogout() {
+  try { await httpJSON(S.url + '/auth/v1/logout', { method: 'POST', headers: hdrsAuth() }); } catch (_) { /* logout local mesmo se falhar */ }
+}
+async function rest(tabela, query, method = 'GET', body) {
+  const headers = hdrsAuth();
+  if (method !== 'GET') headers['Prefer'] = 'return=representation';
+  const opts = { method, headers };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const r = await httpJSON(S.url + '/rest/v1/' + tabela + (query || ''), opts);
+  return r.body;
+}
+
+/* ---------- Persistência (localStorage) ---------- */
+const LS = {
+  get: (k) => localStorage.getItem(k) || '',
+  set: (k, v) => localStorage.setItem(k, v),
+  del: (k) => localStorage.removeItem(k)
+};
+function salvarCredenciais() { LS.set('supabase_url', S.url); LS.set('supabase_key', S.key); }
+function salvarSessao() {
+  LS.set('access_token', S.token); LS.set('refresh_token', S.refresh);
+  LS.set('user_email', S.user ? S.user.email : ''); LS.set('user_id', S.user ? S.user.id : '');
+}
+function limparSessaoLocal() { ['access_token','refresh_token','user_email','user_id'].forEach(LS.del); S.token = ''; S.refresh = ''; S.user = null; }
+function limparTudoLocal() { ['supabase_url','supabase_key','access_token','refresh_token','user_email','user_id'].forEach(LS.del); S.url=''; S.key=''; limparSessaoLocal(); }
+
+/* ---------- Motor de prazos (determinístico) ---------- */
+function ehDiaUtil(d, feriadosSet) {
+  const w = d.getDay();
+  if (w === 0 || w === 6) return false;
+  return !feriadosSet.has(iso(d));
+}
+function diasUteisEntre(de, ate, feriadosSet) {
+  // Conta dias úteis após 'de' até 'ate' (inclusive de 'ate').
+  if (ate <= de) return 0;
+  let n = 0;
+  const cur = new Date(de);
+  cur.setDate(cur.getDate() + 1);
+  while (cur <= ate) { if (ehDiaUtil(cur, feriadosSet)) n++; cur.setDate(cur.getDate() + 1); }
+  return n;
+}
+function calcularPedido(p, etapas, cfg) {
+  const feriados = new Set((cfg && cfg.feriados) || []);
+  const capacidade = Number((cfg && cfg.capacidade_producao_diaria) || 150) || 150;
+  const diasAtencao = Number((cfg && cfg.dias_atencao) || 5);
+  const diasUrgencia = Number((cfg && cfg.dias_urgencia) || 2);
+  const hoje = hojeISO();
+  const prometida = parseISO(p.data_prometida) || hoje;
+  const qtd = Number(p.quantidade) || 0;
+  const prod = Number(p.quantidade_produzida) || 0;
+  const pendente = Math.max(0, qtd - prod);
+  const entregue = (p.status === 'entregue' || p.status === 'concluido' || p.status === 'concluído');
+  const etapasPedido = etapas.filter(e => e.pedido_id === p.id).sort((a,b) => a.ordem - b.ordem);
+  const etapasPend = etapasPedido.filter(e => e.status !== 'concluida');
+  const tempoPend = etapasPend.reduce((s,e) => s + (Number(e.tempo_estimado_dias) || 0), 0);
+  const diasRestantes = diasUteisEntre(hoje, prometida, feriados) * (prometida >= hoje ? 1 : 0);
+  const diasAtraso = prometida < hoje ? diasEntre(prometida, hoje) : 0;
+  const diasCorridosRest = diasEntre(hoje, prometida);
+  const ritmoNecessario = diasRestantes > 0 ? Math.ceil(pendente / diasRestantes) : pendente;
+  const deficit = Math.max(0, ritmoNecessario - capacidade);
+
+  let faixa = 'verde';
+  let motivoBase = '';
+  if (entregue) faixa = 'azul';
+  else if (diasCorridosRest <= 0 && prometida < hoje) faixa = 'vermelho';
+  else if (diasCorridosRest <= 0 || diasCorridosRest <= diasUrgencia || tempoPend > diasRestantes) faixa = 'vermelho';
+  else if (diasCorridosRest <= diasAtencao || ritmoNecessario > capacidade) faixa = 'amarelo';
+
+  // Score de risco
+  let score = 0;
+  if (!entregue) {
+    if (prometida < hoje) score += 1000 + diasAtraso * 10;
+    if (diasCorridosRest === 0 && prometida >= hoje) score += 800;
+    if (diasCorridosRest > 0 && diasCorridosRest <= diasUrgencia) score += 500;
+    if (tempoPend > diasRestantes) score += 300;
+    if (diasCorridosRest > 0 && diasCorridosRest <= diasAtencao) score += 200;
+    score += deficit * 2;
+    score += etapasPend.length * 5;
+  }
+
+  // Motivo textual
+  if (entregue) motivoBase = 'Pedido entregue — sem pendências.';
+  else if (prometida < hoje) motivoBase = `Atrasado há ${diasAtraso} dia(s). ${fmtNum(pendente)} peças ainda pendentes.`;
+  else if (diasCorridosRest === 0) motivoBase = `Vence hoje com ${fmtNum(pendente)} peças pendentes — ritmo necessário ${fmtNum(ritmoNecessario)}/dia.`;
+  else {
+    motivoBase = `Faltam ${diasRestantes} dia(s) úteis e ${fmtNum(pendente)} peças pendentes — ritmo necessário ${fmtNum(ritmoNecessario)}/dia contra capacidade de ${fmtNum(capacidade)}/dia.`;
+    if (tempoPend > diasRestantes) motivoBase += ` Etapas pendentes somam ${tempoPend} dia(s), acima do prazo útil.`;
+  }
+
+  return {
+    id: p.id, faixa, score, diasRestantes, diasAtraso, diasCorridosRest, pendente, qtd, prod,
+    ritmoNecessario, capacidade, tempoPend, motivo: motivoBase, entregue, etapasPedido,
+    prometida, setor: p.setor_atual || NOMES_SETORES[0]
+  };
+}
+function calcularTodos() {
+  const cfg = S.dados.config || {};
+  const mapa = {};
+  S.dados.pedidos.forEach(p => { mapa[p.id] = calcularPedido(p, S.dados.etapas, cfg); });
+  return mapa;
+}
+function rotuloFaixa(f) {
+  return { azul: 'Finalizado', verde: 'No prazo', amarelo: 'Atenção', vermelho: 'Crítico' }[f] || f;
+}
+function badgeFaixa(f) { return `<span class="badge-f f-${f}">${rotuloFaixa(f)}</span>`; }
+
+/* ---------- Dados de demonstração ---------- */
+function gerarDemo() {
+  const hoje = hojeISO();
+  const add = (n) => { const d = new Date(hoje); d.setDate(d.getDate() + n); return iso(d); };
+  const cfg = { id: 1, nome_empresa: 'Confecções Bahia Têxtil S.A.', dias_atencao: 5, dias_urgencia: 2, capacidade_producao_diaria: 150, feriados: [add(3)], tempo_estimado_por_etapa: {} };
+  const pedidos = [
+    { id: 'd1', numero: 'PED-2031', cliente: 'Moda Litoral Ltda', produto: 'Camiseta polo algodão', quantidade: 600, observacoes: 'Cores pantone 19-4052', data_entrada: add(-12), data_prometida: add(-1), responsavel: 'Marcos Vieira', setor_atual: NOMES_SETORES[3], quantidade_produzida: 380, status: 'em_producao' },
+    { id: 'd2', numero: 'PED-2034', cliente: 'Uniformes Norte SA', produto: 'Jaleco de brim', quantidade: 800, observacoes: '', data_entrada: add(-8), data_prometida: add(2), responsavel: 'Ana Paula Rocha', setor_atual: NOMES_SETORES[2], quantidade_produzida: 120, status: 'em_producao' },
+    { id: 'd3', numero: 'PED-2037', cliente: 'Escola Esperança', produto: 'Moletom bordado', quantidade: 300, observacoes: 'Bordado com logo', data_entrada: add(-5), data_prometida: add(0), responsavel: 'Renato Lima', setor_atual: NOMES_SETORES[4], quantidade_produzida: 260, status: 'em_producao' },
+    { id: 'd4', numero: 'PED-2040', cliente: 'Hotel Mar Azul', produto: 'Roupão felpudo', quantidade: 450, observacoes: '', data_entrada: add(-3), data_prometida: add(6), responsavel: 'Juliana Prado', setor_atual: NOMES_SETORES[1], quantidade_produzida: 40, status: 'em_producao' },
+    { id: 'd5', numero: 'PED-2042', cliente: 'Corrida Forte Esportes', produto: 'Regata dry fit', quantidade: 1200, observacoes: 'Urgente, evento', data_entrada: add(-10), data_prometida: add(4), responsavel: 'Marcos Vieira', setor_atual: NOMES_SETORES[2], quantidade_produzida: 300, status: 'em_producao' },
+    { id: 'd6', numero: 'PED-2029', cliente: 'Padaria Pão Dourado', produto: 'Avental de linho', quantidade: 120, observacoes: '', data_entrada: add(-20), data_prometida: add(-4), responsavel: 'Ana Paula Rocha', setor_atual: NOMES_SETORES[6], quantidade_produzida: 120, status: 'entregue' },
+    { id: 'd7', numero: 'PED-2045', cliente: 'Academia Corpo Forte', produto: 'Legging compressão', quantidade: 500, observacoes: '', data_entrada: add(-1), data_prometida: add(12), responsavel: 'Renato Lima', setor_atual: NOMES_SETORES[0], quantidade_produzida: 0, status: 'aberto' },
+    { id: 'd8', numero: 'PED-2046', cliente: 'Construtora Vale Verde', produto: 'Colete refletivo', quantidade: 250, observacoes: 'NR-6', data_entrada: add(-6), data_prometida: add(1), responsavel: 'Juliana Prado', setor_atual: NOMES_SETORES[5], quantidade_produzida: 180, status: 'em_producao' }
+  ];
+  const etapas = [];
+  const tempos = ETAPAS_PADRAO.map(e => e.tempo);
+  pedidos.forEach((p, pi) => {
+    const idxAtual = NOMES_SETORES.indexOf(p.setor_atual);
+    ETAPAS_PADRAO.forEach((e, i) => {
+      let st = 'pendente';
+      if (p.status === 'entregue' || i < idxAtual) st = 'concluida';
+      else if (i === idxAtual) st = 'em_andamento';
+      etapas.push({ id: 'e' + pi + '-' + i, pedido_id: p.id, nome: e.nome, ordem: e.ordem, status: st, data_inicio: st !== 'pendente' ? p.data_entrada : null, data_conclusao: st === 'concluida' ? add(-1) : null, responsavel: p.responsavel, quantidade_concluida: st === 'concluida' ? p.quantidade : 0, tempo_estimado_dias: tempos[i] });
+    });
+  });
+  const historico = [
+    { id: 'h1', pedido_id: 'd1', data_hora: new Date().toISOString(), usuario: 'demo@local', tipo: 'etapa', descricao: 'Etapa Costura iniciada', campo_anterior: 'Estamparia', campo_novo: 'Costura' },
+    { id: 'h2', pedido_id: 'd3', data_hora: new Date(Date.now()-86400000).toISOString(), usuario: 'demo@local', tipo: 'quantidade', descricao: 'Produção atualizada para 260', campo_anterior: '200', campo_novo: '260' },
+    { id: 'h3', pedido_id: 'd6', data_hora: new Date(Date.now()-3*86400000).toISOString(), usuario: 'demo@local', tipo: 'status', descricao: 'Pedido entregue', campo_anterior: 'em_producao', campo_novo: 'entregue' }
+  ];
+  const perfis = [{ id: 'demo', email: 'demo@local', nome: 'Visitante Demo', papel: 'admin', setor: null }];
+  return { config: cfg, pedidos, etapas, historico, perfis };
+}
+
+/* ---------- Carregamento de dados ---------- */
+async function carregarDados() {
+  setFooter('Carregando dados...');
+  if (S.modo === 'demo') {
+    const d = gerarDemo();
+    S.dados.config = d.config; S.dados.pedidos = d.pedidos; S.dados.etapas = d.etapas;
+    S.dados.historico = d.historico; S.dados.perfis = d.perfis;
+    S.perfil = d.perfis[0]; S.somenteLeitura = false;
+    setFooter('Modo demonstração — dados fictícios');
+    return;
+  }
+  const uid = S.user && S.user.id;
+  const [cfg, peds, etps, hist, perf] = await Promise.all([
+    rest('configuracoes', '?id=eq.1&select=*'),
+    rest('pedidos', '?select=*&order=data_prometida.asc'),
+    rest('etapas_pedido', '?select=*&order=ordem.asc'),
+    rest('historico', '?select=*&order=data_hora.desc&limit=200'),
+    rest('perfis', '?select=*&id=eq.' + encodeURIComponent(uid))
+  ]);
+  S.dados.config = (cfg && cfg[0]) || { id: 1, nome_empresa: 'Empresa', dias_atencao: 5, dias_urgencia: 2, capacidade_producao_diaria: 150, feriados: [], tempo_estimado_por_etapa: {} };
+  S.dados.pedidos = peds || []; S.dados.etapas = etps || []; S.dados.historico = hist || [];
+  S.perfil = (perf && perf[0]) || null;
+  S.somenteLeitura = !S.perfil;
+  S.dados.perfis = S.perfil ? [S.perfil] : [];
+  setFooter('Supabase conectado como ' + (S.user ? S.user.email : '—'));
+}
+
+/* ---------- Permissões ---------- */
+function podeEscrever() { return !S.somenteLeitura && S.modo === 'app' || S.modo === 'demo'; }
+function podeGerenciar() { return (S.modo === 'demo') || (S.perfil && (S.perfil.papel === 'admin' || S.perfil.papel === 'gerente')); }
+function podeAtualizarSetor(setor) {
+  if (S.modo === 'demo') return true;
+  if (S.somenteLeitura) return false;
+  if (!S.perfil) return false;
+  if (S.perfil.papel === 'admin' || S.perfil.papel === 'gerente') return true;
+  if (S.perfil.papel === 'colaborador') return S.perfil.setor === setor;
+  return false;
+}
+function avisoSomenteLeitura() { window.skipUI.toast('Modo somente leitura: seu perfil não permite esta ação.', { type: 'error', title: 'Sem permissão' }); }
+
+/* ---------- Escritas ---------- */
+async function gravarPedido(payload, id) {
+  if (S.modo === 'demo') {
+    if (id) { const p = S.dados.pedidos.find(x => x.id === id); Object.assign(p, payload); }
+    else { const novo = { id: 'd' + Date.now(), ...payload, status: 'em_producao', quantidade_produzida: payload.quantidade_produzida || 0 }; S.dados.pedidos.push(novo);
+      NOMES_SETORES.forEach((n, i) => S.dados.etapas.push({ id: 'e' + novo.id + i, pedido_id: novo.id, nome: n, ordem: i+1, status: i === 0 ? 'em_andamento' : 'pendente', data_inicio: i===0 ? payload.data_entrada : null, data_conclusao: null, responsavel: payload.responsavel, quantidade_concluida: 0, tempo_estimado_dias: ETAPAS_PADRAO[i].tempo })); }
+    return;
+  }
+  if (id) await rest('pedidos', '?id=eq.' + id, 'PATCH', payload);
+  else {
+    const novo = await rest('pedidos', '', 'POST', { ...payload, status: 'em_producao' });
+    const pid = novo && novo[0] && novo[0].id;
+    if (pid) {
+      await rest('etapas_pedido', '', 'POST', ETAPAS_PADRAO.map((e, i) => ({ pedido_id: pid, nome: e.nome, ordem: e.ordem, status: i === 0 ? 'em_andamento' : 'pendente', data_inicio: i === 0 ? payload.data_entrada : null, responsavel: payload.responsavel || null, quantidade_concluida: 0, tempo_estimado_dias: e.tempo })));
+    }
+  }
+}
+async function excluirPedido(id) {
+  if (S.modo === 'demo') { S.dados.pedidos = S.dados.pedidos.filter(p => p.id !== id); S.dados.etapas = S.dados.etapas.filter(e => e.pedido_id !== id); return; }
+  await rest('etapas_pedido', '?pedido_id=eq.' + id, 'DELETE');
+  await rest('pedidos', '?id=eq.' + id, 'DELETE');
+}
+async function concluirEtapa(pedido, etapa) {
+  const hoje = iso(hojeISO());
+  const proxIdx = etapa.ordem; // próxima etapa (ordem 1-based)
+  const proxima = NOMES_SETORES[proxIdx];
+  const concluiu = !proxima;
+  const novoSetor = concluiu ? NOMES_SETORES[NOMES_SETORES.length - 1] : proxima;
+  if (S.modo === 'demo') {
+    etapa.status = 'concluida'; etapa.data_conclusao = hoje; etapa.quantidade_concluida = pedido.quantidade;
+    const prox = S.dados.etapas.find(e => e.pedido_id === pedido.id && e.ordem === etapa.ordem + 1);
+    if (prox) prox.status = 'em_andamento';
+    pedido.setor_atual = novoSetor; pedido.status = concluiu ? 'entregue' : 'em_producao';
+    if (concluiu) pedido.quantidade_produzida = pedido.quantidade;
+    return;
+  }
+  await rest('etapas_pedido', '?id=eq.' + etapa.id, 'PATCH', { status: 'concluida', data_conclusao: hoje, quantidade_concluida: pedido.quantidade });
+  if (!concluiu) {
+    const prox = S.dados.etapas.find(e => e.pedido_id === pedido.id && e.ordem === etapa.ordem + 1);
+    if (prox) await rest('etapas_pedido', '?id=eq.' + prox.id, 'PATCH', { status: 'em_andamento', data_inicio: hoje });
+  }
+  await rest('pedidos', '?id=eq.' + pedido.id, 'PATCH', { setor_atual: novoSetor, status: concluiu ? 'entregue' : 'em_producao', quantidade_produzida: concluiu ? pedido.quantidade : pedido.quantidade_produzida });
+}
+async function atualizarQuantidadeEtapa(pedido, etapa, qtd, responsavel) {
+  if (S.modo === 'demo') { etapa.quantidade_concluida = qtd; etapa.responsavel = responsavel; pedido.quantidade_produzida = qtd; return; }
+  await rest('etapas_pedido', '?id=eq.' + etapa.id, 'PATCH', { quantidade_concluida: qtd, responsavel });
+  await rest('pedidos', '?id=eq.' + pedido.id, 'PATCH', { quantidade_produzida: qtd });
+}
+async function gravarConfig(cfg) {
+  if (S.modo === 'demo') { Object.assign(S.dados.config, cfg); return; }
+  await rest('configuracoes', '?id=eq.1', 'PATCH', cfg);
+}
+async function gravarHistorico(pedidoId, tipo, descricao, anterior, novo) {
+  const reg = { pedido_id: pedidoId, data_hora: new Date().toISOString(), usuario: S.user ? S.user.email : 'demo', tipo, descricao, campo_anterior: String(anterior ?? ''), campo_novo: String(novo ?? '') };
+  if (S.modo === 'demo') { S.dados.historico.unshift({ id: 'h' + Date.now(), ...reg }); return; }
+  try { await rest('historico', '', 'POST', reg); } catch (_) { /* histórico é complementar */ }
+}
+
+/* ---------- Ações de sessão ---------- */
+async function recarregarTudo() {
+  try { await carregarDados(); }
+  catch (e) { tratarErroDados(e); }
+  renderApp();
+}
+function tratarErroDados(e) {
+  if (e.status === 401) {
+    window.skipUI.toast('Sessão expirada. Entre novamente.', { type: 'error' });
+    voltarLogin();
+    return;
+  }
+  const humano = traduzirErroDados(e.status, e.body);
+  const msg = humano || (e.message || 'Erro ao consultar dados.');
+  window.skipUI.toast(msg, { type: 'error', title: 'Erro de dados' });
+  if (!humano) console.error('[SDP] erro:', e.body);
+}
+function voltarLogin() {
+  limparSessaoLocal();
+  S.modo = 'login';
+  mostrarLogin();
+}
+
+function mostrarLogin() {
+  show('state-login');
+  $('#login-conn-url').textContent = 'Projeto: ' + (S.url || '—');
+  setFooter('Não conectado — faça login');
+  $('#form-login').hidden = false; $('#form-signup').hidden = true; $('#login-foot').hidden = false;
+  $('#login-sub').textContent = 'Entre com sua conta da equipe';
+  clearMsg($('#login-msg')); clearMsg($('#signup-msg'));
+}
+
+/* ---------- Verificação no carregamento ---------- */
+async function inicializar() {
+  S.url = LS.get('supabase_url'); S.key = LS.get('supabase_key');
+  S.token = LS.get('access_token'); S.refresh = LS.get('refresh_token');
+  const email = LS.get('user_email'), uid = LS.get('user_id');
+  if (!S.url || !S.key) { S.modo = 'setup'; show('state-setup'); setFooter('Não configurado'); return; }
+  if (!S.token) { S.modo = 'login'; mostrarLogin(); return; }
+  S.user = { id: uid, email };
+  try {
+    const u = await authUser();
+    S.user = { id: u.body.id, email: u.body.email };
+    salvarSessao();
+  } catch (e) {
+    if (e.status === 401) {
+      try {
+        const r = await authRefresh();
+        S.token = r.body.access_token; S.refresh = r.body.refresh_token; S.user = { id: r.body.user.id, email: r.body.user.email };
+        salvarSessao();
+      } catch (_) { voltarLogin(); return; }
+    } else { voltarLogin(); return; }
+  }
+  S.modo = 'app';
+  await entrarNoApp();
+}
+
+async function entrarNoApp() {
+  show('state-app');
+  $('#demo-banner').hidden = S.modo !== 'demo';
+  $('#user-email').textContent = S.modo === 'demo' ? 'demo@local (demonstração)' : (S.user ? S.user.email : '');
+  $('#btn-account').textContent = (($('#user-email').textContent || '?').trim().charAt(0) || '?').toUpperCase();
+  $('#btn-logout').textContent = S.modo === 'demo' ? 'Sair da demo' : 'Sair';
+  $('#page-main').innerHTML = '<div class="empty"><span class="spinner"></span>Carregando dados do Supabase...</div>';
+  renderMenu();
+  try { await carregarDados(); }
+  catch (e) { tratarErroDados(e); }
+  $('#profile-banner').hidden = !(S.modo === 'app' && !S.perfil);
+  renderApp();
+}
+
+/* ---------- Menu e navegação ---------- */
+const PAGINAS = [
+  { id: 'dashboard', nome: 'Dashboard' },
+  { id: 'pedidos', nome: 'Pedidos' },
+  { id: 'alertas', nome: 'Alertas' },
+  { id: 'assistente', nome: 'Assistente' },
+  { id: 'relatorio', nome: 'Relatório de fim de dia' },
+  { id: 'config', nome: 'Configurações' }
+];
+function contarAlertas() { const m = calcularTodos(); return Object.values(m).filter(x => !x.entregue && (x.faixa === 'vermelho' || x.faixa === 'amarelo')).length; }
+function renderMenu() {
+  const n = contarAlertas();
+  $('#nav-menu').innerHTML = PAGINAS.map(p => `
+    <button class="nav-item" type="button" data-page="${p.id}" ${S.pagina === p.id ? 'aria-current="page"' : ''}>
+      <span>${esc(p.nome)}</span>
+      ${p.id === 'alertas' && n > 0 ? `<span class="nav-count" aria-label="${n} alertas">${n}</span>` : ''}
+    </button>`).join('');
+  $('#nav-menu').querySelectorAll('[data-page]').forEach(b => b.addEventListener('click', () => { S.pagina = b.dataset.page; renderApp(); }));
+}
+function renderApp() {
+  renderMenu();
+  const meta = {
+    dashboard: ['Dashboard', 'Visão geral dos pedidos ativos e prazos.'],
+    pedidos: ['Pedidos', 'Gerencie pedidos, filtros e situação de cada item.'],
+    detalhe: ['Detalhe do pedido', 'Etapas, progresso e histórico do pedido.'],
+    alertas: ['Alertas', 'Central de atenção: prazos, risco e pedidos parados.'],
+    assistente: ['Assistente', 'Consultas determinísticas sobre os pedidos.'],
+    relatorio: ['Relatório de fim de dia', 'Pronto para impressão em A4.'],
+    config: ['Configurações', 'Empresa, prazos, feriados, etapas e conexão.']
+  };
+  const m = meta[S.pagina] || meta.dashboard;
+  $('#page-title').textContent = m[0];
+  $('#page-sub').textContent = m[1];
+  const main = $('#page-main');
+  const render = {
+    dashboard: renderDashboard, pedidos: renderPedidos, detalhe: renderDetalhe, alertas: renderAlertas,
+    assistente: renderAssistente, relatorio: renderRelatorio, config: renderConfig
+  }[S.pagina] || renderDashboard;
+  main.innerHTML = '';
+  render(main);
+  setFooter(S.modo === 'demo' ? 'Modo demonstração — dados fictícios' : 'Supabase conectado como ' + (S.user ? S.user.email : '—'));
+}
+
+/* ===================== TELA: DASHBOARD ===================== */
+function renderDashboard(root) {
+  const mapa = calcularTodos();
+  const lista = Object.values(mapa);
+  const ativos = lista.filter(x => !x.entregue);
+  const verdes = ativos.filter(x => x.faixa === 'verde' || x.faixa === 'azul').length;
+  const emRisco = ativos.filter(x => x.faixa === 'amarelo').length;
+  const criticos = ativos.filter(x => x.faixa === 'vermelho').length;
+  const concluidos = lista.filter(x => x.entregue).length;
+  const cfg = S.dados.config || {};
+
+  root.innerHTML = `
+    <div class="row between mb-4" style="margin-bottom:12px">
+      <div><span class="eyebrow-pill">${esc(cfg.nome_empresa || 'Empresa')}</span>
+      <p class="page-sub">Atualizado em ${fmtDataHora(new Date().toISOString())}</p></div>
+      <div class="row gap-2">
+        <span class="badge" data-variant="secondary">${ativos.length} ativos</span>
+        <span class="badge" data-variant="outline">Capacidade ${fmtNum(cfg.capacidade_producao_diaria)}/dia</span>
+      </div>
+    </div>
+    <div class="grid-kpi">
+      <div class="card-box"><div class="kpi-big">${ativos.length}</div><div class="kpi-cap">Total ativos — pedidos em produção hoje</div></div>
+      <div class="card-box"><div class="kpi-big" style="color:#15803d">${verdes}</div><div class="kpi-cap">Dentro do prazo — folga confirmada</div></div>
+      <div class="card-box"><div class="kpi-big" style="color:#a16207">${emRisco}</div><div class="kpi-cap">Em risco — exige atenção nos próximos dias</div></div>
+      <div class="card-box"><div class="kpi-big" style="color:#b91c1c">${criticos}</div><div class="kpi-cap">Críticos ou atrasados — agir hoje</div></div>
+      <div class="card-box"><div class="kpi-big" style="color:#1d4ed8">${concluidos}</div><div class="kpi-cap">Concluídos — entregues ao cliente</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card-box"><h2>Pedidos por setor</h2><p class="sub">Quantidade de pedidos ativos em cada etapa do fluxo.</p><div id="barras-setor"></div></div>
+      <div class="card-box"><h2>Peças por setor</h2><p class="sub">Volume de peças pendentes acumulado por etapa.</p><div id="barras-pecas"></div></div>
+    </div>
+    <div class="card-box" style="margin-bottom:16px"><h2>Calendário de entregas</h2><p class="sub">Cada entrega colorida pela faixa de risco do pedido no mês atual.</p><div id="calendario"></div></div>
+    <div class="card-box"><div class="row between" style="margin-bottom:8px"><div><h2>Top 10 mais urgentes</h2><p class="sub">Ordenado por score de risco. Clique em um pedido para ver detalhes.</p></div><span class="badge" data-variant="outline">Score decrescente</span></div>
+      <div id="top10"></div></div>`;
+
+  // Barras por setor
+  const cont = NOMES_SETORES.map(() => 0), pecas = NOMES_SETORES.map(() => 0);
+  ativos.forEach(a => {
+    const i = NOMES_SETORES.indexOf(a.setor);
+    if (i >= 0) { cont[i]++; pecas[i] += a.pendente; }
+  });
+  const maxC = Math.max(1, ...cont), maxP = Math.max(1, ...pecas);
+  $('#barras-setor').innerHTML = NOMES_SETORES.map((n, i) => `<div class="bar-row"><span>${esc(n)}</span><div class="bar"><span style="width:${(cont[i]/maxC*100).toFixed(0)}%"></span></div><strong>${cont[i]}</strong></div>`).join('');
+  $('#barras-pecas').innerHTML = NOMES_SETORES.map((n, i) => `<div class="bar-row"><span>${esc(n)}</span><div class="bar"><span style="width:${(pecas[i]/maxP*100).toFixed(0)}%"></span></div><strong>${fmtNum(pecas[i])}</strong></div>`).join('');
+
+  // Calendário mensal
+  renderCalendario($('#calendario'), mapa);
+
+  // Top 10
+  const top = ordenarPorScore(mapa).slice(0, 10);
+  $('#top10').innerHTML = top.length ? tabelaResumo(top, false) : '<div class="empty">Nenhum pedido em aberto no momento.</div>';
+  ligarAcoesTabela($('#top10'));
+}
+function ordenarPorScore(mapa) {
+  return Object.values(mapa).sort((a, b) => b.score - a.score || a.diasRestantes - b.diasRestantes);
+}
+function nomeCliente(id) { const p = S.dados.pedidos.find(x => x.id === id); return p ? p.cliente : '—'; }
+function numeroPedido(id) { const p = S.dados.pedidos.find(x => x.id === id); return p ? p.numero : '—'; }
+function tabelaResumo(lista, comRanking) {
+  return `<div class="table-wrap"><table class="data"><thead><tr>
+    ${comRanking ? '<th>#</th>' : ''}<th>Pedido</th><th>Cliente</th><th>Faixa</th><th>Score</th><th>Motivo</th><th></th></tr></thead><tbody>
+    ${lista.map((x, i) => {
+      const p = S.dados.pedidos.find(q => q.id === x.id);
+      return `<tr>${comRanking ? `<td>${i+1}</td>` : ''}<td><strong>${esc(p.numero)}</strong><div class="muted text-xs">${esc(p.produto)}</div></td>
+      <td>${esc(p.cliente)}</td><td>${badgeFaixa(x.faixa)}</td><td class="mono">${x.score}</td>
+      <td style="max-width:340px">${esc(x.motivo)}</td>
+      <td><button class="btn" data-variant="ghost" data-size="sm" data-detalhe="${x.id}">Detalhe</button></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+function ligarAcoesTabela(root) {
+  root.querySelectorAll('[data-detalhe]').forEach(b => b.addEventListener('click', () => { S.detalheId = b.dataset.detalhe; S.pagina = 'detalhe'; renderApp(); }));
+}
+function renderCalendario(el, mapa) {
+  const hoje = hojeISO();
+  const ano = hoje.getFullYear(), mes = hoje.getMonth();
+  const primeiro = new Date(ano, mes, 1);
+  const inicio = new Date(primeiro); inicio.setDate(1 - primeiro.getDay());
+  const dias = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const porDia = {};
+  Object.values(mapa).forEach(x => { const k = iso(x.prometida); (porDia[k] = porDia[k] || []).push(x); });
+  let html = '<div class="cal">' + dias.map(d => `<div class="cal-h">${d}</div>`).join('');
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(inicio); d.setDate(inicio.getDate() + i);
+    const k = iso(d);
+    const mute = d.getMonth() !== mes;
+    const itens = porDia[k] || [];
+    html += `<div class="cal-d ${mute ? 'mute' : ''}"><span class="n">${d.getDate()}</span>` +
+      itens.slice(0, 3).map(x => `<span class="cal-chip f-${x.faixa}" title="${esc(numeroPedido(x.id))}">${esc(numeroPedido(x.id))}</span>`).join('') +
+      (itens.length > 3 ? `<span class="muted" style="font-size:.66rem">+${itens.length-3}</span>` : '') + '</div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+/* ===================== TELA: PEDIDOS ===================== */
+function renderPedidos(root) {
+  const mapa = calcularTodos();
+  const setores = NOMES_SETORES;
+  root.innerHTML = `
+    <div class="card-box">
+      <div class="row between" style="margin-bottom:8px">
+        <div><h2>Lista de pedidos</h2><p class="sub">Busque por número ou cliente e filtre por status, setor e faixa de risco.</p></div>
+        <button class="btn no-print" id="btn-novo-pedido" ${S.somenteLeitura ? 'disabled' : ''}>Novo pedido</button>
+      </div>
+      <div class="toolbar">
+        <input class="input" id="f-busca" type="search" placeholder="Buscar número ou cliente" value="${esc(S.busca)}" aria-label="Buscar pedido">
+        <select class="input" id="f-status" aria-label="Filtrar por status" style="max-width:180px">
+          <option value="">Todos os status</option>
+          <option value="em_producao" ${S.filtroStatus==='em_producao'?'selected':''}>Em produção</option>
+          <option value="aberto" ${S.filtroStatus==='aberto'?'selected':''}>Aberto</option>
+          <option value="entregue" ${S.filtroStatus==='entregue'?'selected':''}>Entregue</option>
+        </select>
+        <select class="input" id="f-setor" aria-label="Filtrar por setor" style="max-width:220px">
+          <option value="">Todos os setores</option>
+          ${setores.map(s => `<option value="${esc(s)}" ${S.filtroSetor===s?'selected':''}>${esc(s)}</option>`).join('')}
+        </select>
+        <select class="input" id="f-faixa" aria-label="Filtrar por faixa" style="max-width:180px">
+          <option value="">Todas as faixas</option>
+          ${['vermelho','amarelo','verde','azul'].map(f => `<option value="${f}" ${S.filtroFaixa===f?'selected':''}>${rotuloFaixa(f)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="table-wrap pedidos-table"><table class="data"><thead><tr>
+        <th>Pedido</th><th>Cliente</th><th>Produto</th><th>Qtd.</th><th>Produzido</th><th>Setor</th><th>Prometida</th><th>Faixa</th><th>Ações</th>
+      </tr></thead><tbody id="tb-pedidos"></tbody></table></div>
+      <div class="mobile-cards" id="cards-pedidos"></div>
+      <p class="helper" id="contador-pedidos"></p>
+    </div>`;
+
+  const aplicar = () => {
+    const q = S.busca.trim().toLowerCase();
+    const lista = S.dados.pedidos.filter(p => {
+      const x = mapa[p.id];
+      if (q && !(String(p.numero).toLowerCase().includes(q) || String(p.cliente).toLowerCase().includes(q))) return false;
+      if (S.filtroStatus && p.status !== S.filtroStatus) return false;
+      if (S.filtroSetor && (p.setor_atual || NOMES_SETORES[0]) !== S.filtroSetor) return false;
+      if (S.filtroFaixa && x.faixa !== S.filtroFaixa) return false;
+      return true;
+    }).sort((a,b) => (mapa[b.id].score - mapa[a.id].score));
+    $('#contador-pedidos').textContent = `${lista.length} de ${S.dados.pedidos.length} pedidos exibidos`;
+    if (!lista.length) {
+      $('#tb-pedidos').innerHTML = '<tr><td colspan="9" class="empty">Nenhum pedido corresponde aos filtros.</td></tr>';
+      $('#cards-pedidos').innerHTML = '<div class="empty">Nenhum pedido corresponde aos filtros.</div>';
+      return;
+    }
+    $('#tb-pedidos').innerHTML = lista.map(p => {
+      const x = mapa[p.id];
+      return `<tr>
+        <td><strong>${esc(p.numero)}</strong></td><td>${esc(p.cliente)}</td><td>${esc(p.produto)}</td>
+        <td class="mono">${fmtNum(p.quantidade)}</td><td class="mono">${fmtNum(p.quantidade_produzida)}</td>
+        <td>${esc(p.setor_atual)}</td><td>${fmtData(p.data_prometida)}</td><td>${badgeFaixa(x.faixa)}</td>
+        <td><div class="row gap-1">
+          <button class="btn" data-variant="ghost" data-size="sm" data-act="detalhe" data-id="${p.id}">Detalhe</button>
+          <button class="btn" data-variant="outline" data-size="sm" data-act="editar" data-id="${p.id}" ${S.somenteLeitura?'disabled':''}>Editar</button>
+          <button class="btn" data-variant="secondary" data-size="sm" data-act="concluir" data-id="${p.id}" ${S.somenteLeitura || x.entregue?'disabled':''}>Concluir</button>
+          <button class="btn" data-variant="destructive" data-size="sm" data-act="excluir" data-id="${p.id}" ${S.somenteLeitura?'disabled':''}>Excluir</button>
+        </div></td></tr>`;
+    }).join('');
+    $('#cards-pedidos').innerHTML = lista.map(p => {
+      const x = mapa[p.id];
+      return `<div class="pcard risk-${x.faixa}"><div class="row-top"><strong>${esc(p.numero)} — ${esc(p.cliente)}</strong>${badgeFaixa(x.faixa)}</div>
+        <div class="text-sm muted">${esc(p.produto)}</div>
+        <div class="pcard-grid">
+          <div><div class="lbl">Quantidade</div><div class="val">${fmtNum(p.quantidade_produzida)}/${fmtNum(p.quantidade)}</div></div>
+          <div><div class="lbl">Setor</div><div class="val">${esc(p.setor_atual)}</div></div>
+          <div><div class="lbl">Prometida</div><div class="val">${fmtData(p.data_prometida)}</div></div>
+          <div><div class="lbl">Dias restantes</div><div class="val">${x.entregue ? '—' : (x.diasCorridosRest < 0 ? 'atraso ' + x.diasAtraso : x.diasRestantes)}</div></div>
+        </div>
+        <div class="actions">
+          <button class="btn" data-variant="ghost" data-size="sm" data-act="detalhe" data-id="${p.id}">Detalhe</button>
+          <button class="btn" data-variant="outline" data-size="sm" data-act="editar" data-id="${p.id}" ${S.somenteLeitura?'disabled':''}>Editar</button>
+          <button class="btn" data-variant="secondary" data-size="sm" data-act="concluir" data-id="${p.id}" ${S.somenteLeitura || x.entregue?'disabled':''}>Concluir</button>
+          <button class="btn" data-variant="destructive" data-size="sm" data-act="excluir" data-id="${p.id}" ${S.somenteLeitura?'disabled':''}>Excluir</button>
+        </div></div>`;
+    }).join('');
+    root.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => acaoPedido(b.dataset.act, b.dataset.id)));
+  };
+  $('#f-busca').addEventListener('input', e => { S.busca = e.target.value; aplicar(); });
+  $('#f-status').addEventListener('change', e => { S.filtroStatus = e.target.value; aplicar(); });
+  $('#f-setor').addEventListener('change', e => { S.filtroSetor = e.target.value; aplicar(); });
+  $('#f-faixa').addEventListener('change', e => { S.filtroFaixa = e.target.value; aplicar(); });
+  $('#btn-novo-pedido').addEventListener('click', () => abrirFormPedido(null));
+  aplicar();
+}
+async function acaoPedido(act, id) {
+  const p = S.dados.pedidos.find(x => x.id === id);
+  if (!p) return;
+  if (act === 'detalhe') { S.detalheId = id; S.pagina = 'detalhe'; renderApp(); return; }
+  if (act === 'editar') { if (S.somenteLeitura) return avisoSomenteLeitura(); abrirFormPedido(p); return; }
+  if (act === 'concluir') {
+    if (S.somenteLeitura) return avisoSomenteLeitura();
+    const etapa = S.dados.etapas.find(e => e.pedido_id === id && e.status !== 'concluida');
+    if (!etapa) return window.skipUI.toast('Este pedido já não tem etapas pendentes.');
+    if (!podeAtualizarSetor(etapa.nome)) return avisoSomenteLeitura();
+    try {
+      await concluirEtapa(p, etapa);
+      await gravarHistorico(id, 'etapa', `Etapa "${etapa.nome}" concluída`, etapa.nome, 'próxima etapa');
+      await recarregarTudo();
+      window.skipUI.toast(`Etapa "${etapa.nome}" concluída em ${p.numero}.`, { type: 'success' });
+    } catch (e) { tratarErroDados(e); }
+    return;
+  }
+  if (act === 'excluir') {
+    if (S.somenteLeitura) return avisoSomenteLeitura();
+    if (!confirm(`Excluir o pedido ${p.numero}? Esta ação não pode ser desfeita.`)) return;
+    try { await excluirPedido(id); await recarregarTudo(); window.skipUI.toast(`Pedido ${p.numero} excluído.`, { type: 'success' }); }
+    catch (e) { tratarErroDados(e); }
+  }
+}
+
+/* ---------- Formulário de pedido (modal) ---------- */
+let pedidoEditId = null;
+function preencherSetores() {
+  $('#p-setor').innerHTML = NOMES_SETORES.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+}
+function abrirFormPedido(p) {
+  preencherSetores();
+  pedidoEditId = p ? p.id : null;
+  $('#dlg-pedido-title').textContent = p ? `Editar pedido ${p.numero}` : 'Novo pedido';
+  $('#p-numero').value = p ? p.numero : '';
+  $('#p-cliente').value = p ? p.cliente : '';
+  $('#p-produto').value = p ? p.produto : '';
+  $('#p-quantidade').value = p ? p.quantidade : '';
+  $('#p-produzida').value = p ? (p.quantidade_produzida || 0) : 0;
+  $('#p-entrada').value = p ? p.data_entrada : iso(hojeISO());
+  $('#p-prometida').value = p ? p.data_prometida : '';
+  $('#p-responsavel').value = p ? (p.responsavel || '') : '';
+  $('#p-setor').value = p ? (p.setor_atual || NOMES_SETORES[0]) : NOMES_SETORES[0];
+  $('#p-obs').value = p ? (p.observacoes || '') : '';
+  document.querySelectorAll('#form-pedido [id^="err-p-"]').forEach(e => e.hidden = true);
+  clearMsg($('#dlg-pedido-msg'));
+  $('#dlg-pedido').showModal();
+}
+function validarPedido() {
+  let ok = true;
+  const campos = [
+    ['p-numero', v => !!v.trim(), 'Informe o número do pedido.'],
+    ['p-cliente', v => !!v.trim(), 'Informe o cliente.'],
+    ['p-produto', v => !!v.trim(), 'Informe o produto.'],
+    ['p-quantidade', v => Number(v) > 0, 'A quantidade deve ser maior que zero.'],
+    ['p-entrada', v => !!v, 'Informe a data de entrada.'],
+    ['p-prometida', v => !!v, 'Informe a data prometida.']
+  ];
+  document.querySelectorAll('#form-pedido [id^="err-p-"]').forEach(e => e.hidden = true);
+  campos.forEach(([id, fn, msg]) => {
+    if (!fn($('#' + id).value)) { const e = $('#err-' + id); e.textContent = msg; e.hidden = false; ok = false; }
+  });
+  const q = Number($('#p-quantidade').value), pr = Number($('#p-produzida').value || 0);
+  if (ok && (pr < 0 || pr > q)) { const e = $('#err-p-produzida'); e.textContent = 'A produção não pode ser negativa nem maior que a quantidade total.'; e.hidden = false; ok = false; }
+  if (ok && $('#p-prometida').value < $('#p-entrada').value) { const e = $('#err-p-prometida'); e.textContent = 'A data prometida deve ser igual ou posterior à data de entrada.'; e.hidden = false; ok = false; }
+  return ok;
+}
+async function salvarPedidoForm(ev) {
+  ev.preventDefault();
+  if (!validarPedido()) return;
+  const btn = $('#btn-save-pedido');
+  const payload = {
+    numero: $('#p-numero').value.trim(), cliente: $('#p-cliente').value.trim(), produto: $('#p-produto').value.trim(),
+    quantidade: Number($('#p-quantidade').value), quantidade_produzida: Number($('#p-produzida').value || 0),
+    data_entrada: $('#p-entrada').value, data_prometida: $('#p-prometida').value,
+    responsavel: $('#p-responsavel').value.trim(), setor_atual: $('#p-setor').value, observacoes: $('#p-obs').value.trim()
+  };
+  setBusy(btn, true, 'Salvando...');
+  try {
+    await gravarPedido(payload, pedidoEditId);
+    await gravarHistorico(pedidoEditId || 'novo', 'pedido', pedidoEditId ? 'Pedido editado' : 'Pedido criado', '', payload.numero);
+    $('#dlg-pedido').close();
+    await recarregarTudo();
+    window.skipUI.toast(pedidoEditId ? 'Pedido atualizado.' : 'Pedido criado com sucesso.', { type: 'success' });
+  } catch (e) {
+    const msg = traduzirErroDados(e.status, e.body) || e.message;
+    setMsg($('#dlg-pedido-msg'), 'err', msg, e.raw);
+  } finally { setBusy(btn, false); }
+}
+
+/* ===================== TELA: DETALHE ===================== */
+function renderDetalhe(root) {
+  const p = S.dados.pedidos.find(x => x.id === S.detalheId);
+  if (!p) { root.innerHTML = '<div class="card-box empty">Selecione um pedido na tela Pedidos.</div>'; return; }
+  const mapa = calcularTodos(); const x = mapa[p.id];
+  const etapas = S.dados.etapas.filter(e => e.pedido_id === p.id).sort((a,b) => a.ordem - b.ordem);
+  const atual = etapas.find(e => e.status !== 'concluida');
+  const hist = S.dados.historico.filter(h => h.pedido_id === p.id);
+  const pct = Math.min(100, Math.round((p.quantidade_produzida / Math.max(1, p.quantidade)) * 100));
+  root.innerHTML = `
+    <div class="row between" style="margin-bottom:12px">
+      <button class="btn" data-variant="outline" id="btn-voltar">← Voltar à lista</button>
+      <div class="row gap-2">${badgeFaixa(x.faixa)}<span class="badge" data-variant="secondary">Score ${x.score}</span></div>
+    </div>
+    <div class="card-box" style="margin-bottom:16px">
+      <div class="row between"><div><span class="eyebrow-pill">${esc(p.numero)}</span><h2 style="font-size:1.2rem;margin-top:6px">${esc(p.produto)}</h2><p class="sub">${esc(p.cliente)} • Responsável: ${esc(p.responsavel || '—')}</p></div></div>
+      <div class="grid-kpi" style="margin-top:8px">
+        <div><div class="kpi-big" style="font-size:1.4rem">${fmtNum(p.quantidade)}</div><div class="kpi-cap">Quantidade total</div></div>
+        <div><div class="kpi-big" style="font-size:1.4rem">${fmtNum(p.quantidade_produzida)}</div><div class="kpi-cap">Produzido até agora</div></div>
+        <div><div class="kpi-big" style="font-size:1.4rem">${fmtData(p.data_prometida)}</div><div class="kpi-cap">Data prometida</div></div>
+        <div><div class="kpi-big" style="font-size:1.4rem">${x.entregue ? '—' : x.diasRestantes}</div><div class="kpi-cap">Dias úteis restantes</div></div>
+      </div>
+      <p class="sub">Progresso de produção: ${pct}%</p>
+      <div class="bar"><span style="width:${pct}%"></span></div>
+      <p class="helper" style="margin-top:8px"><strong>Motivo:</strong> ${esc(x.motivo)}</p>
+      <p class="helper">Dados: entrada ${fmtData(p.data_entrada)} • Setor atual: ${esc(p.setor_atual)}${p.observacoes ? ' • Obs.: ' + esc(p.observacoes) : ''}</p>
+    </div>
+    <div class="grid-2">
+      <div class="card-box"><h2>Timeline das 7 etapas</h2><p class="sub">Etapas concluídas em verde, etapa atual em azul.</p>
+        <ol class="timeline">${etapas.map(e => `<li><span class="tl-dot ${e.status==='concluida'?'done':(e===atual?'current':'')}">${e.ordem}</span>
+          <div><strong>${esc(e.nome)}</strong><div class="muted text-xs">${e.status==='concluida'?'Concluída em '+fmtData(e.data_conclusao):(e===atual?'Em andamento':'Pendente')} • ${e.tempo_estimado_dias} dia(s) estimado</div></div></li>`).join('')}</ol>
+      </div>
+      <div class="card-box"><h2>Atualizar etapa atual</h2><p class="sub">${atual ? 'Registre a quantidade produzida e o responsável da etapa em andamento.' : 'Todas as etapas foram concluídas.'}</p>
+        ${atual ? `<form id="form-etapa" class="stack gap-2" novalidate>
+          <div><label for="et-nome">Etapa</label><input class="input" id="et-nome" value="${esc(atual.nome)}" disabled></div>
+          <div><label for="et-qtd">Quantidade produzida nesta etapa *</label><input class="input" id="et-qtd" type="number" min="0" max="${p.quantidade}" value="${atual.quantidade_concluida || p.quantidade_produzida}" required><p class="helper">Máximo: ${fmtNum(p.quantidade)} peças.</p><p class="field-error" id="err-et-qtd" hidden></p></div>
+          <div><label for="et-resp">Responsável *</label><input class="input" id="et-resp" value="${esc(atual.responsavel || p.responsavel || '')}" required placeholder="Nome do responsável"><p class="field-error" id="err-et-resp" hidden></p></div>
+          <div class="row gap-2"><button type="submit" class="btn" id="btn-etapa-salvar" ${podeAtualizarSetor(atual.nome) ? '' : 'disabled'}>Salvar quantidade</button>
+          <button type="button" class="btn" data-variant="secondary" id="btn-etapa-concluir" ${podeAtualizarSetor(atual.nome) ? '' : 'disabled'}>Concluir etapa</button></div>
+          ${podeAtualizarSetor(atual.nome) ? '' : '<p class="helper">Seu perfil só pode atualizar etapas do seu setor.</p>'}
+          <div id="etapa-msg"></div></form>` : '<div class="empty">Pedido sem etapas pendentes.</div>'}
+      </div>
+    </div>
+    <div class="card-box" style="margin-top:16px"><h2>Histórico</h2><p class="sub">Registro cronológico de alterações do pedido.</p>
+      ${hist.length ? hist.slice(0,30).map(h => `<div class="hist-item"><strong>${fmtDataHora(h.data_hora)}</strong> — ${esc(h.usuario)}<br>${esc(h.descricao)}${h.campo_anterior || h.campo_novo ? `<div class="muted text-xs">${esc(h.campo_anterior)} → ${esc(h.campo_novo)}</div>` : ''}</div>`).join('') : '<div class="empty">Nenhum registro de histórico para este pedido.</div>'}
+    </div>`;
+  $('#btn-voltar').addEventListener('click', () => { S.pagina = 'pedidos'; renderApp(); });
+  if (atual) {
+    $('#form-etapa').addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const qtd = Number($('#et-qtd').value), resp = $('#et-resp').value.trim();
+      $('#err-et-qtd').hidden = true; $('#err-et-resp').hidden = true;
+      if (!(qtd >= 0 && qtd <= p.quantidade)) { $('#err-et-qtd').textContent = 'Informe uma quantidade entre 0 e o total do pedido.'; $('#err-et-qtd').hidden = false; return; }
+      if (!resp) { $('#err-et-resp').textContent = 'Informe o responsável.'; $('#err-et-resp').hidden = false; return; }
+      if (!podeAtualizarSetor(atual.nome)) return avisoSomenteLeitura();
+      const btn = $('#btn-etapa-salvar'); setBusy(btn, true, 'Salvando...');
+      try {
+        await atualizarQuantidadeEtapa(p, atual, qtd, resp);
+        await gravarHistorico(p.id, 'quantidade', `Produção de "${atual.nome}" atualizada`, atual.quantidade_concluida, qtd);
+        await recarregarTudo(); window.skipUI.toast('Quantidade atualizada.', { type: 'success' });
+      } catch (e) { setMsg($('#etapa-msg'), 'err', traduzirErroDados(e.status, e.body) || e.message, e.raw); }
+      finally { setBusy(btn, false); }
+    });
+    $('#btn-etapa-concluir').addEventListener('click', () => acaoPedido('concluir', p.id));
+  }
+}
+
+/* ===================== TELA: ALERTAS ===================== */
+function renderAlertas(root) {
+  const mapa = calcularTodos();
+  const lista = Object.values(mapa).filter(x => !x.entregue);
+  const cfg = S.dados.config || {};
+  const prazoProx = lista.filter(x => x.diasCorridosRest > 0 && x.diasCorridosRest <= (cfg.dias_atencao || 5));
+  const risco = lista.filter(x => x.faixa === 'vermelho' && x.diasAtraso === 0);
+  const atrasados = lista.filter(x => x.diasAtraso > 0);
+  const parados = lista.filter(x => {
+    const et = S.dados.etapas.find(e => e.pedido_id === x.id && e.status === 'em_andamento');
+    if (!et || !et.data_inicio) return false;
+    return diasEntre(parseISO(et.data_inicio), hojeISO()) > 3;
+  });
+  const gerar = (titulo, cor, itens, chave) => {
+    const pendentes = itens.filter(x => !S.dados.alertasLidos.includes(chave + x.id));
+    return `<div class="card-box" style="margin-bottom:12px"><div class="row between"><div><h2>${titulo}</h2><p class="sub">${itens.length} pedido(s) nesta condição.</p></div>
+      <span class="badge" data-variant="${cor}">${pendentes.length} pendentes</span></div>
+      ${itens.length ? itens.map(x => {
+        const p = S.dados.pedidos.find(q => q.id === x.id);
+        const lido = S.dados.alertasLidos.includes(chave + x.id);
+        return `<div class="alert-item"><div><strong>${esc(p.numero)} — ${esc(p.cliente)}</strong><div class="text-sm">${esc(x.motivo)}</div><div class="muted text-xs">Setor: ${esc(p.setor_atual)} • Prometida ${fmtData(p.data_prometida)}</div></div>
+        <button class="btn" data-variant="${lido?'ghost':'outline'}" data-size="sm" data-ack="${chave+x.id}" ${lido?'disabled':''}>${lido?'Confirmado':'Confirmar recebimento'}</button></div>`;
+      }).join('') : '<div class="empty">Nenhum alerta nesta categoria.</div>'}</div>`;
+  };
+  const totalAlertas = prazoProx.length + risco.length + atrasados.length + parados.length;
+  root.innerHTML = `
+    <div class="grid-kpi">
+      <div class="card-box"><div class="kpi-big">${totalAlertas}</div><div class="kpi-cap">Alertas ativos no total</div></div>
+      <div class="card-box"><div class="kpi-big">${lista.length}</div><div class="kpi-cap">Pedidos em aberto analisados</div></div>
+      <div class="card-box"><div class="kpi-big">${parados.length}</div><div class="kpi-cap">Parados há mais de 3 dias no setor</div></div>
+    </div>
+    <div class="card-box" style="margin-bottom:12px"><h2>Resumo diário</h2><p class="sub">${lista.length} pedidos em aberto, ${atrasados.length} atrasados e ${prazoProx.length} com prazo próximo.</p></div>
+    ${gerar('Prazo próximo', 'secondary', prazoProx, 'pp:')}
+    ${gerar('Risco crítico', 'destructive', risco, 'rc:')}
+    ${gerar('Pedido parado há mais de 3 dias', 'outline', parados, 'pa:')}
+    ${gerar('Pedidos atrasados', 'destructive', atrasados, 'at:')}
+    <div class="card-box" style="margin-top:12px"><h2>Canais de envio</h2><p class="sub">Envio externo de alertas ainda não está ativo.</p>
+      <div class="ch-card"><div><strong>WhatsApp</strong><div class="muted text-xs">NÃO CONFIGURADO — envio real exige credenciais externas e uma rotina no backend.</div></div><span class="badge" data-variant="outline">Não configurado</span></div>
+      <div class="ch-card"><div><strong>E-mail</strong><div class="muted text-xs">NÃO CONFIGURADO — exige serviço de envio e rotina agendada no servidor.</div></div><span class="badge" data-variant="outline">Não configurado</span></div>
+    </div>`;
+  root.querySelectorAll('[data-ack]').forEach(b => b.addEventListener('click', async () => {
+    const key = b.dataset.ack;
+    try {
+      if (S.modo !== 'demo') await rest('historico', '', 'POST', { pedido_id: key.split(':')[1] ? null : null, data_hora: new Date().toISOString(), usuario: S.user ? S.user.email : 'demo', tipo: 'alerta', descricao: 'Alerta confirmado: ' + key, campo_anterior: '', campo_novo: 'confirmado' }).catch(()=>{});
+      S.dados.alertasLidos.push(key);
+      window.skipUI.toast('Recebimento confirmado.', { type: 'success' });
+      renderApp();
+    } catch (e) { tratarErroDados(e); }
+  }));
+}
+
+/* ===================== TELA: ASSISTENTE ===================== */
+const PERGUNTAS_RAPIDAS = [
+  'Quais pedidos precisam ser priorizados hoje?',
+  'Quais vencem amanhã?',
+  'Quais estão atrasados?',
+  'Qual setor está acumulando mais pedidos?',
+  'Como está o pedido número PED-2034?',
+  'Quantas peças ainda faltam produzir?',
+  'Quais correm risco de não serem entregues?',
+  'O que precisamos finalizar hoje?'
+];
+function responderAssistente(texto) {
+  const t = texto.toLowerCase();
+  const mapa = calcularTodos();
+  const ativos = Object.values(mapa).filter(x => !x.entregue);
+  const ordenados = ativos.slice().sort((a,b) => b.score - a.score);
+  const linha = (x) => { const p = S.dados.pedidos.find(q => q.id === x.id); return `${p.numero} (${p.cliente}) — ${x.diasCorridosRest < 0 ? 'atrasado ' + x.diasAtraso + ' dia(s)' : x.diasRestantes + ' dia(s) úteis restantes'}. Motivo: ${x.motivo}`; };
+  const vazio = 'Nenhum pedido nesta condição.';
+  if (/(^|\s)priorizar|prioridade|priorizados/.test(t) || /hoje/.test(t) && /prioriz/.test(t)) {
+    const l = ordenados.filter(x => x.faixa === 'vermelho' || x.faixa === 'amarelo').slice(0, 5);
+    return l.length ? 'Priorize hoje:\n' + l.map(linha).join('\n') : vazio;
+  }
+  if (/amanh/.test(t) || /vencem/.test(t)) {
+    const l = ativos.filter(x => x.diasCorridosRest === 1);
+    return l.length ? 'Vencem amanhã:\n' + l.map(linha).join('\n') : vazio;
+  }
+  if (/atras/.test(t)) {
+    const l = ativos.filter(x => x.diasAtraso > 0).sort((a,b) => b.diasAtraso - a.diasAtraso);
+    return l.length ? 'Atrasados:\n' + l.map(linha).join('\n') : vazio;
+  }
+  if (/setor/.test(t) && /acumul|mais|pedidos/.test(t)) {
+    const cont = {};
+    ativos.forEach(x => { cont[x.setor] = (cont[x.setor] || 0) + 1; });
+    const ord = Object.entries(cont).sort((a,b) => b[1]-a[1]);
+    return ord.length ? `O setor com mais pedidos é "${ord[0][0]}", com ${ord[0][1]} pedido(s).` : vazio;
+  }
+  const m = t.match(/ped[-\s]?(\d+)/i) || t.match(/pedido\s+n[úu]mero\s+(\S+)/i);
+  if (m) {
+    const num = m[0].replace(/\s+/g,'').toUpperCase().replace('PEDIDO', 'PED').replace(/^PED-?/, 'PED-');
+    const p = S.dados.pedidos.find(q => String(q.numero).toUpperCase() === num || String(q.numero).toUpperCase().endsWith(m[1]));
+    if (!p) return vazio;
+    const x = mapa[p.id];
+    return `${p.numero} — ${p.cliente}\nProduto: ${p.produto}\nProduzido: ${fmtNum(p.quantidade_produzida)} de ${fmtNum(p.quantidade)}\nSetor atual: ${p.setor_atual}\nFaixa: ${rotuloFaixa(x.faixa)}\nDias restantes: ${x.diasCorridosRest < 0 ? 'atrasado ' + x.diasAtraso + ' dia(s)' : x.diasRestantes + ' dia(s) úteis'}\nMotivo: ${x.motivo}`;
+  }
+  if (/peças|pecas|faltam|falta/.test(t)) {
+    const total = ativos.reduce((s,x) => s + x.pendente, 0);
+    return `Ainda faltam ${fmtNum(total)} peças em ${ativos.length} pedido(s) ativos.`;
+  }
+  if (/risco|entregue|não ser|nao ser/.test(t)) {
+    const l = ativos.filter(x => x.faixa === 'vermelho' || x.faixa === 'amarelo').sort((a,b) => b.score-a.score);
+    return l.length ? 'Pedidos com risco de atraso:\n' + l.map(linha).join('\n') : vazio;
+  }
+  if (/finaliz|hoje/.test(t)) {
+    const l = ativos.filter(x => x.diasCorridosRest <= 0 || x.faixa === 'vermelho');
+    return l.length ? 'Para finalizar hoje:\n' + l.map(linha).join('\n') : vazio;
+  }
+  return 'Não entendi a pergunta. Tente uma das sugestões acima, como "Quais estão atrasados?" ou "Como está o pedido PED-2034?".';
+}
+function renderAssistente(root) {
+  root.innerHTML = `
+    <div class="grid-2">
+      <div class="card-box">
+        <h2>Assistente de produção</h2>
+        <p class="sub">Respostas geradas por regras determinísticas sobre os dados carregados — não é um modelo de IA.</p>
+        <div class="chat-box" id="chat-box" role="log" aria-live="polite"></div>
+        <form id="form-chat" class="row gap-2" style="margin-top:10px" novalidate>
+          <input class="input grow" id="chat-input" type="text" placeholder="Digite sua pergunta, ex.: quais estão atrasados?" aria-label="Pergunta ao assistente" style="flex:1">
+          <button class="btn" type="submit">Perguntar</button>
+        </form>
+        <p class="helper">Opera por regras determinísticas: sempre a mesma resposta para os mesmos dados.</p>
+      </div>
+      <div class="card-box">
+        <h2>Perguntas rápidas</h2>
+        <p class="sub">Toque em uma sugestão para perguntar diretamente.</p>
+        <div class="chip-row" id="chips"></div>
+        <p class="helper">Palavras-chave que funcionam: atrasado, amanhã, priorizar, setor, peças, risco, finalizar, PED-número.</p>
+      </div>
+    </div>`;
+  const box = $('#chat-box');
+  const addMsg = (tipo, txt) => { const d = document.createElement('div'); d.className = 'msg ' + tipo; d.textContent = txt; box.appendChild(d); box.scrollTop = box.scrollHeight; };
+  if (!S.chatMsgs.length) S.chatMsgs.push({ t: 'bot', x: 'Olá! Pergunte sobre prazos, setores, pedidos ou peças pendentes.' });
+  S.chatMsgs.forEach(m => addMsg(m.t === 'bot' ? 'bot' : 'user', m.x));
+  const perguntar = (q) => {
+    S.chatMsgs.push({ t: 'user', x: q }); addMsg('user', q);
+    const r = responderAssistente(q); S.chatMsgs.push({ t: 'bot', x: r }); addMsg('bot', r);
+  };
+  $('#chips').innerHTML = PERGUNTAS_RAPIDAS.map((q, i) => `<button type="button" class="chip" data-q="${i}">${esc(q)}</button>`).join('');
+  $('#chips').querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => perguntar(PERGUNTAS_RAPIDAS[b.dataset.q])));
+  $('#form-chat').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const q = $('#chat-input').value.trim();
+    if (!q) return window.skipUI.toast('Digite uma pergunta antes de enviar.', { type: 'error' });
+    $('#chat-input').value = ''; perguntar(q);
+  });
+}
+
+/* ===================== TELA: RELATÓRIO ===================== */
+function renderRelatorio(root) {
+  const mapa = calcularTodos();
+  const cfg = S.dados.config || {};
+  const agora = new Date();
+  const dataHora = fmtData(iso(agora)) + ' ' + String(agora.getHours()).padStart(2,'0') + ':' + String(agora.getMinutes()).padStart(2,'0');
+  const abertos = ordenarPorScore(mapa).filter(x => !x.entregue);
+  const cont = { azul: 0, verde: 0, amarelo: 0, vermelho: 0 };
+  abertos.forEach(x => cont[x.faixa]++);
+  const concluidosDia = Object.values(mapa).filter(x => x.entregue);
+  const atrasados = abertos.filter(x => x.diasAtraso > 0);
+  const user = S.user ? S.user.email : 'demo';
+  const linhaRel = (x, i) => {
+    const p = S.dados.pedidos.find(q => q.id === x.id);
+    return `<tr><td>${i+1}</td><td>${esc(p.numero)}</td><td>${esc(p.cliente)}</td><td>${esc(p.produto)}</td><td>${fmtNum(p.quantidade)}</td>
+      <td>${fmtNum(p.quantidade_produzida)}</td><td>${fmtNum(x.pendente)}</td><td>${esc(p.setor_atual)}</td><td>${fmtData(p.data_prometida)}</td>
+      <td>${x.diasCorridosRest < 0 ? 'atraso ' + x.diasAtraso : x.diasRestantes}</td><td>${rotuloFaixa(x.faixa)}</td><td>${x.score}</td><td>${esc(x.motivo)}</td></tr>`;
+  };
+  const cab = `<thead><tr><th>#</th><th>Número</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Produzido</th><th>Pendente</th><th>Setor</th><th>Prometida</th><th>Dias úteis</th><th>Faixa</th><th>Score</th><th>Motivo</th></tr></thead>`;
+  root.innerHTML = `
+    <div class="row no-print" style="margin-bottom:12px;gap:8px">
+      <button class="btn" id="btn-imprimir">Imprimir / Salvar PDF</button>
+      <button class="btn" data-variant="outline" id="btn-csv">Exportar CSV</button>
+      <span class="helper">A impressão usa layout A4 em preto e branco.</span>
+    </div>
+    <div class="report-page" id="report-area">
+      <div class="report-head">
+        <h1>${esc(cfg.nome_empresa || 'Empresa')} — Relatório de fim de dia</h1>
+        <div class="report-meta">Emitido em ${dataHora} • Usuário: ${esc(user)} • Pedidos em aberto: ${abertos.length}</div>
+      </div>
+      <h2 class="rep-h2">Resumo executivo</h2>
+      <div class="rep-sum">
+        <div><strong>${cont.vermelho}</strong><br>Crítico</div>
+        <div><strong>${cont.amarelo}</strong><br>Atenção</div>
+        <div><strong>${cont.verde}</strong><br>No prazo</div>
+        <div><strong>${cont.azul}</strong><br>Finalizado</div>
+        <div><strong>${atrasados.length}</strong><br>Atrasados</div>
+        <div><strong>${fmtNum(abertos.reduce((s,x)=>s+x.pendente,0))}</strong><br>Peças pendentes</div>
+      </div>
+      <h2 class="rep-h2">Lista completa de pedidos em aberto (ranking por risco)</h2>
+      ${abertos.length ? `<table class="rep-table">${cab}<tbody>${abertos.map(linhaRel).join('')}</tbody></table>` : '<p>Nenhum pedido em aberto.</p>'}
+      <div class="rep-page-break"></div>
+      <h2 class="rep-h2">Atrasados</h2>
+      ${atrasados.length ? `<table class="rep-table">${cab}<tbody>${atrasados.map((x,i)=>linhaRel(x,i)).join('')}</tbody></table>` : '<p>Nenhum pedido atrasado.</p>'}
+      <h2 class="rep-h2">Concluídos / entregues</h2>
+      ${concluidosDia.length ? `<table class="rep-table"><thead><tr><th>Número</th><th>Cliente</th><th>Produto</th><th>Total</th><th>Prometida</th></tr></thead><tbody>${concluidosDia.map(x=>{const p=S.dados.pedidos.find(q=>q.id===x.id);return `<tr><td>${esc(p.numero)}</td><td>${esc(p.cliente)}</td><td>${esc(p.produto)}</td><td>${fmtNum(p.quantidade)}</td><td>${fmtData(p.data_prometida)}</td></tr>`;}).join('')}</tbody></table>` : '<p>Nenhum pedido entregue.</p>'}
+    </div>`;
+  $('#btn-imprimir').addEventListener('click', () => { window.print(); });
+  $('#btn-csv').addEventListener('click', () => {
+    const cab2 = ['posicao','numero','cliente','produto','quantidade','produzida','pendente','setor','prometida','dias_uteis','faixa','score','motivo'];
+    const linhas = abertos.map((x,i) => { const p = S.dados.pedidos.find(q=>q.id===x.id); return [i+1,p.numero,p.cliente,p.produto,p.quantidade,p.quantidade_produzida,x.pendente,p.setor_atual,fmtData(p.data_prometida),x.diasRestantes,rotuloFaixa(x.faixa),x.score,x.motivo]; });
+    baixarCSV('relatorio-fim-de-dia.csv', [cab2, ...linhas]);
+    window.skipUI.toast('CSV do relatório exportado.', { type: 'success' });
+  });
+}
+function baixarCSV(nome, linhas) {
+  const csv = linhas.map(l => l.map(c => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(';')).join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ===================== TELA: CONFIGURAÇÕES ===================== */
+function renderConfig(root) {
+  const cfg = S.dados.config || {};
+  const gerente = podeGerenciar();
+  const dis = gerente ? '' : 'disabled';
+  const etapasCfg = ETAPAS_PADRAO.map(e => ({ nome: e.nome, ordem: e.ordem, tempo: (cfg.tempo_estimado_por_etapa && cfg.tempo_estimado_por_etapa[e.ordem]) || e.tempo }));
+  root.innerHTML = `
+    <div class="grid-2">
+      <div class="card-box"><h2>Dados da empresa</h2><p class="sub">Nome exibido nos relatórios e cabeçalhos.</p>
+        <form id="form-cfg" class="stack gap-2" novalidate>
+          <div><label for="c-nome">Nome da empresa *</label><input class="input" id="c-nome" value="${esc(cfg.nome_empresa || '')}" ${dis} required><p class="field-error" id="err-c-nome" hidden></p></div>
+          <div class="grid-2" style="margin:0"><div><label for="c-atencao">Dias de atenção *</label><input class="input" id="c-atencao" type="number" min="1" value="${cfg.dias_atencao ?? 5}" ${dis}><p class="helper">Prazo que dispara o amarelo.</p></div>
+          <div><label for="c-urgencia">Dias de urgência *</label><input class="input" id="c-urgencia" type="number" min="0" value="${cfg.dias_urgencia ?? 2}" ${dis}><p class="helper">Prazo que dispara o vermelho.</p></div></div>
+          <div><label for="c-cap">Capacidade diária (peças) *</label><input class="input" id="c-cap" type="number" min="1" value="${cfg.capacidade_producao_diaria ?? 150}" ${dis}><p class="field-error" id="err-c-cap" hidden></p></div>
+          <div id="cfg-msg"></div>
+          <button class="btn" type="submit" ${dis}>Salvar configurações</button>
+          ${gerente ? '' : '<p class="helper">Somente administradores e gerentes podem alterar estas configurações.</p>'}
+        </form>
+      </div>
+      <div class="card-box"><h2>Feriados</h2><p class="sub">Dias não úteis descontados do cálculo de prazo.</p>
+        <div class="row gap-2" style="margin-bottom:8px"><input class="input" type="date" id="fer-data" aria-label="Data do feriado" ${dis}><button class="btn" data-variant="outline" id="btn-add-fer" ${dis}>Adicionar</button></div>
+        <p class="field-error" id="err-fer" hidden></p>
+        <div id="lista-fer" class="stack gap-1"></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card-box"><h2>Etapas do fluxo</h2><p class="sub">Nome, ordem e tempo estimado de cada etapa.</p>
+        <div class="table-wrap"><table class="data"><thead><tr><th>Ordem</th><th>Nome</th><th>Tempo (dias)</th></tr></thead><tbody>
+        ${etapasCfg.map(e => `<tr><td>${e.ordem}</td><td>${esc(e.nome)}</td><td>${e.tempo}</td></tr>`).join('')}</tbody></table></div>
+        <p class="helper">O fluxo de 7 etapas é fixo; os tempos podem ser ajustados em dias.</p>
+      </div>
+      <div class="card-box"><h2>Exportar e backup</h2><p class="sub">Baixe os dados para planilha ou um arquivo de segurança.</p>
+        <div class="row gap-2"><button class="btn" data-variant="outline" id="btn-csv-ped">Exportar pedidos (CSV)</button><button class="btn" data-variant="secondary" id="btn-backup">Backup JSON</button></div>
+        <h2 style="margin-top:16px">Conexão</h2><p class="sub">Projeto Supabase e sessão atual.</p>
+        <div class="stack gap-1 text-sm">
+          <div><span class="muted">URL conectada:</span> <strong style="word-break:break-all">${esc(S.url || (S.modo==='demo'?'Modo demonstração':'—'))}</strong></div>
+          <div><span class="muted">E-mail logado:</span> <strong>${esc(S.user ? S.user.email : (S.modo==='demo'?'demo@local':'—'))}</strong></div>
+          <div><span class="muted">Papel:</span> <strong>${esc(S.perfil ? S.perfil.papel : (S.modo==='demo'?'admin (demo)':'sem perfil'))}</strong></div>
+        </div>
+        <div class="row gap-2" style="margin-top:12px"><button class="btn" data-variant="destructive" id="btn-desconectar">Desconectar</button></div>
+      </div>
+    </div>`;
+
+  const renderFer = () => {
+    const f = (S.dados.config.feriados || []).slice().sort();
+    $('#lista-fer').innerHTML = f.length ? f.map(d => `<div class="row between" style="padding:6px 0;border-bottom:1px solid var(--border)"><span>${fmtData(d)}</span>${gerente ? `<button class="btn" data-variant="ghost" data-size="sm" data-rm="${d}">Remover</button>` : ''}</div>`).join('') : '<div class="empty">Nenhum feriado cadastrado.</div>';
+    $('#lista-fer').querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', async () => {
+      const novos = (S.dados.config.feriados || []).filter(x => x !== b.dataset.rm);
+      try { await gravarConfig({ feriados: novos }); S.dados.config.feriados = novos; renderApp(); window.skipUI.toast('Feriado removido.', { type: 'success' }); }
+      catch (e) { tratarErroDados(e); }
+    }));
+  };
+  renderFer();
+  $('#btn-add-fer').addEventListener('click', async () => {
+    const d = $('#fer-data').value;
+    $('#err-fer').hidden = true;
+    if (!d) { $('#err-fer').textContent = 'Escolha uma data.'; $('#err-fer').hidden = false; return; }
+    const lista = (S.dados.config.feriados || []).slice();
+    if (lista.includes(d)) { $('#err-fer').textContent = 'Este feriado já está cadastrado.'; $('#err-fer').hidden = false; return; }
+    lista.push(d);
+    try { await gravarConfig({ feriados: lista }); S.dados.config.feriados = lista; renderApp(); window.skipUI.toast('Feriado adicionado.', { type: 'success' }); }
+    catch (e) { tratarErroDados(e); }
+  });
+  $('#form-cfg').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const nome = $('#c-nome').value.trim(), cap = Number($('#c-cap').value);
+    $('#err-c-nome').hidden = true; $('#err-c-cap').hidden = true;
+    if (!nome) { $('#err-c-nome').textContent = 'Informe o nome da empresa.'; $('#err-c-nome').hidden = false; return; }
+    if (!(cap > 0)) { $('#err-c-cap').textContent = 'A capacidade deve ser maior que zero.'; $('#err-c-cap').hidden = false; return; }
+    if (!gerente) return avisoSomenteLeitura();
+    const payload = { nome_empresa: nome, dias_atencao: Number($('#c-atencao').value), dias_urgencia: Number($('#c-urgencia').value), capacidade_producao_diaria: cap };
+    try { await gravarConfig(payload); Object.assign(S.dados.config, payload); window.skipUI.toast('Configurações salvas.', { type: 'success' }); renderApp(); }
+    catch (e) { setMsg($('#cfg-msg'), 'err', traduzirErroDados(e.status, e.body) || e.message, e.raw); }
+  });
+  $('#btn-csv-ped').addEventListener('click', () => {
+    const mapa = calcularTodos();
+    const linhas = S.dados.pedidos.map(p => [p.numero,p.cliente,p.produto,p.quantidade,p.quantidade_produzida,p.setor_atual,p.data_entrada,p.data_prometida,p.status,mapa[p.id].faixa]);
+    baixarCSV('pedidos.csv', [['numero','cliente','produto','quantidade','produzida','setor','entrada','prometida','status','faixa'], ...linhas]);
+    window.skipUI.toast('Pedidos exportados em CSV.', { type: 'success' });
+  });
+  $('#btn-backup').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({ exportado_em: new Date().toISOString(), config: S.dados.config, pedidos: S.dados.pedidos, etapas: S.dados.etapas, historico: S.dados.historico }, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'backup-producao.json'; a.click();
+    window.skipUI.toast('Backup JSON gerado.', { type: 'success' });
+  });
+  $('#btn-desconectar').addEventListener('click', async () => {
+    if (!confirm('Desconectar do Supabase? As credenciais e a sessão serão removidas deste navegador.')) return;
+    if (S.modo === 'app' && S.token) await authLogout();
+    limparTudoLocal(); S.modo = 'setup'; S.pagina = 'dashboard';
+    show('state-setup'); setFooter('Não configurado');
+    window.skipUI.toast('Conexão removida. Configure novamente para entrar.');
+  });
+}
+
+/* =====================================================================
+   EVENTOS DE AUTENTICAÇÃO E TELAS INICIAIS
+   ===================================================================== */
+function validarEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+function urlValida(v) { return /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(v); }
+
+function ligarEventos() {
+  // Setup
+  $('#form-setup').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const urlRaw = $('#setup-url').value.trim().replace(/\/+$/, '');
+    const key = $('#setup-key').value.trim();
+    const msg = $('#setup-msg'); clearMsg(msg);
+    $('#err-setup-url').hidden = true; $('#err-setup-key').hidden = true;
+    let ok = true;
+    if (!urlRaw) { $('#err-setup-url').textContent = 'Informe a URL do projeto.'; $('#err-setup-url').hidden = false; ok = false; }
+    else if (!/^https:\/\/.+/i.test(urlRaw)) { $('#err-setup-url').textContent = 'A URL deve começar com https://.'; $('#err-setup-url').hidden = false; ok = false; }
+    if (!key) { $('#err-setup-key').textContent = 'Informe a chave anon public.'; $('#err-setup-key').hidden = false; ok = false; }
+    if (!ok) return;
+    const btn = $('#btn-setup'); setBusy(btn, true, 'Validando conexão...');
+    try {
+      const r = await fetch(urlRaw + '/rest/v1/configuracoes?select=id&limit=1', { headers: { apikey: key } });
+      if (r.status === 200 || r.status === 206) {
+        S.url = urlRaw; S.key = key; salvarCredenciais();
+        S.modo = 'login'; mostrarLogin();
+        window.skipUI.toast('Conexão validada. Entre com sua conta.', { type: 'success' });
+      } else if (r.status === 401 || r.status === 403) {
+        setMsg(msg, 'err', 'Chave inválida. Use a chave anon public.', 'HTTP ' + r.status);
+      } else {
+        setMsg(msg, 'err', 'Não foi possível conectar ao Supabase. Verifique a URL do projeto (deve ser https://SEU-PROJETO.supabase.co, sem barra no final).', 'HTTP ' + r.status);
+      }
+    } catch (e) {
+      setMsg(msg, 'err', 'Não foi possível conectar ao Supabase. Verifique a URL do projeto (deve ser https://SEU-PROJETO.supabase.co, sem barra no final).', String(e && e.message || e));
+    } finally { setBusy(btn, false); }
+  });
+  $('#btn-demo-start').addEventListener('click', () => {
+    S.modo = 'demo'; S.pagina = 'dashboard';
+    entrarNoApp();
+    window.skipUI.toast('Modo demonstração ativado. Nada é salvo no banco.');
+  });
+  $('#btn-demo-connect').addEventListener('click', () => {
+    S.modo = 'setup'; limparTudoLocal(); show('state-setup'); setFooter('Não configurado');
+    $('#setup-url').value = ''; $('#setup-key').value = '';
+  });
+
+  // Login
+  document.querySelectorAll('.pw-toggle').forEach(b => b.addEventListener('click', () => {
+    const inp = document.getElementById(b.dataset.pw);
+    const mostrar = inp.type === 'password';
+    inp.type = mostrar ? 'text' : 'password'; b.textContent = mostrar ? 'Ocultar' : 'Mostrar';
+  }));
+  $('#btn-to-signup').addEventListener('click', () => {
+    $('#form-login').hidden = true; $('#login-foot').hidden = true; $('#form-signup').hidden = false;
+    $('#login-sub').textContent = 'Crie sua conta para acessar o sistema'; clearMsg($('#login-msg'));
+  });
+  $('#btn-to-login').addEventListener('click', () => {
+    $('#form-login').hidden = false; $('#login-foot').hidden = false; $('#form-signup').hidden = true;
+    $('#login-sub').textContent = 'Entre com sua conta da equipe'; clearMsg($('#signup-msg'));
+  });
+  $('#btn-back-setup').addEventListener('click', () => {
+    S.modo = 'setup'; show('state-setup'); setFooter('Não configurado');
+    $('#setup-url').value = S.url; $('#setup-key').value = S.key;
+  });
+
+  $('#form-login').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const email = $('#login-email').value.trim(), pass = $('#login-password').value;
+    $('#err-login-email').hidden = true; $('#err-login-password').hidden = true;
+    let ok = true;
+    if (!validarEmail(email)) { $('#err-login-email').textContent = 'Informe um e-mail válido.'; $('#err-login-email').hidden = false; ok = false; }
+    if (!pass) { $('#err-login-password').textContent = 'Informe a senha.'; $('#err-login-password').hidden = false; ok = false; }
+    if (!ok) return;
+    const btn = $('#btn-login'); setBusy(btn, true, 'Entrando...');
+    clearMsg($('#login-msg'));
+    try {
+      const r = await authLogin(email, pass);
+      S.token = r.body.access_token; S.refresh = r.body.refresh_token;
+      S.user = { id: r.body.user.id, email: r.body.user.email };
+      salvarSessao();
+      S.modo = 'app'; S.pagina = 'dashboard';
+      window.skipUI.toast('Bem-vindo, ' + S.user.email + '.', { type: 'success' });
+      await entrarNoApp();
+    } catch (e) {
+      const t = traduzirErroAuth(e.status, e.body, e.message);
+      setMsg($('#login-msg'), 'err', t.txt || e.message, t.raw || e.raw);
+    } finally { setBusy(btn, false); }
+  });
+
+  $('#form-signup').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const nome = $('#signup-name').value.trim();
+    const email = $('#signup-email').value.trim();
+    const p1 = $('#signup-password').value, p2 = $('#signup-password2').value;
+    ['err-signup-email','err-signup-password','err-signup-password2'].forEach(id => $('#' + id).hidden = true);
+    let ok = true;
+    if (!validarEmail(email)) { $('#err-signup-email').textContent = 'Informe um e-mail válido.'; $('#err-signup-email').hidden = false; ok = false; }
+    if (p1.length < 6) { $('#err-signup-password').textContent = 'A senha deve ter pelo menos 6 caracteres.'; $('#err-signup-password').hidden = false; ok = false; }
+    if (p1 !== p2) { $('#err-signup-password2').textContent = 'As senhas não coincidem.'; $('#err-signup-password2').hidden = false; ok = false; }
+    if (!ok) return;
+    const btn = $('#btn-signup'); setBusy(btn, true, 'Criando conta...');
+    clearMsg($('#signup-msg'));
+    try {
+      const r = await authSignup(email, p1, nome);
+      if (r.body && r.body.access_token) {
+        S.token = r.body.access_token; S.refresh = r.body.refresh_token; S.user = { id: r.body.user.id, email: r.body.user.email };
+        salvarSessao(); S.modo = 'app'; await entrarNoApp();
+      } else {
+        setMsg($('#signup-msg'), 'ok', 'Conta criada. Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.');
+      }
+    } catch (e) {
+      const t = traduzirErroAuth(e.status, e.body, e.message);
+      setMsg($('#signup-msg'), 'err', t.txt || e.message, t.raw || e.raw);
+    } finally { setBusy(btn, false); }
+  });
+
+  // App
+  $('#btn-logout').addEventListener('click', async () => {
+    if (S.modo === 'demo') { S.modo = 'setup'; limparTudoLocal(); show('state-setup'); setFooter('Não configurado'); return; }
+    await authLogout();
+    limparSessaoLocal();
+    S.modo = 'login'; S.perfil = null; S.dados = { config: null, pedidos: [], etapas: [], historico: [], perfis: [], alertasLidos: [] };
+    mostrarLogin();
+    window.skipUI.toast('Você saiu do sistema.');
+  });
+  $('#page-main').setAttribute('tabindex', '-1');
+  const fecharDrawer = () => { document.body.classList.remove('drawer-open'); $('#btn-menu').setAttribute('aria-expanded', 'false'); };
+  $('#btn-menu').addEventListener('click', () => { const abre = !document.body.classList.contains('drawer-open'); document.body.classList.toggle('drawer-open', abre); $('#btn-menu').setAttribute('aria-expanded', String(abre)); });
+  $('#drawer-close').addEventListener('click', fecharDrawer);
+  $('#drawer-overlay').addEventListener('click', fecharDrawer);
+  document.getElementById('nav-menu').addEventListener('click', e => { if (e.target.closest('[data-page]')) fecharDrawer(); });
+  $('#btn-account').addEventListener('click', () => { const m = $('#account-menu'); m.hidden = !m.hidden; $('#btn-account').setAttribute('aria-expanded', String(!m.hidden)); $('#account-email').textContent = $('#user-email').textContent; });
+  $('#btn-account-logout').addEventListener('click', () => { $('#btn-logout').click(); $('#account-menu').hidden = true; });
+  $('#form-pedido').addEventListener('submit', salvarPedidoForm);
+  $('#btn-cancel-pedido').addEventListener('click', () => $('#dlg-pedido').close());
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ligarEventos();
+  inicializar();
+});
+</script>
+</body>
+</html>
